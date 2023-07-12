@@ -10,12 +10,10 @@ from model.recording_manager import *
 import io
 import sys
 from model._activation import ActivationClass
-
+from model.stimulis import *
 
 # Set to True to enable the terminal output,
 # otherwise the output will be redirected to the log file (maybe it is faster this way)
-from model.stimulis import Cylinder
-
 TERMINAL_OUTPUT = True
 
 
@@ -66,9 +64,9 @@ _sensors = SensorGrid(12, 12, _mesh_boost)
 # _sensors = SensorArm(_mesh_boost)
 # _sensors = SensorPatchesFromFile("../patches/circle.csv", _mesh_boost, n_patches=4)
 
-_stimuli = Cylinder(radius=4.0, height=1.0)
+# _stimuli = Cylinder(radius=4.0, height=1.0)
 # _stimuli = Cuboid(6.0, 4.0, 2.0)
-# _stimuli = Sphere(radius=2.1)
+_stimuli = Sphere(radius=2.0)
 
 
 # force_handler = pressure_script.StimuliPressure(_stimuli, 10, rubber)

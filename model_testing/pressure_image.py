@@ -74,7 +74,7 @@ def get_pixel_color(sensor_readings, p_rc):
 
 def get_area(p1, p2, p3):
     # Compute the area of a triangle in 2D
-    return 0.5 * np.linalg.norm(np.cross(p2 - p1, p3 - p1))
+    return abs(0.5 * np.linalg.norm(np.cross(p2 - p1, p3 - p1)))
 
 
 def get_pressure(triangles, uv, x_rc, sensor_readings):
@@ -99,14 +99,14 @@ def get_pressure(triangles, uv, x_rc, sensor_readings):
     # Get the pressure registered in the corresponding sensors
     p_j, p_k, p_h = sensor_readings[triangle]
 
-    # get the areas of the triangles
-    A1 = get_area(m_j, m_k, x_rc)
-    A2 = get_area(m_k, x_rc, m_h)
-    A3 = get_area(m_h, m_j, x_rc)
-    A = get_area(m_j, m_k, m_h)
+    # Get the areas of the triangles
+    A_total = get_area(m_j, m_k, m_h)
+    A1 = get_area(x_rc, m_k, m_h)
+    A2 = get_area(m_j, x_rc, m_h)
+    A3 = get_area(m_j, m_k, x_rc)
 
     # Compute the pressure in p[x(r,c)] using the barycentric interpolation
-    return (A1 * p_h + A2 * p_k + A3 * p_j) / A
+    return (A1 * p_j + A2 * p_k + A3 * p_h) / A_total
 
 
 def show_image(image, uv=None, triangles=None):
@@ -163,7 +163,7 @@ def orthographic_projection(sensor_positions):
     return sensor_positions[:, :2]
 
 
-def form_contact_image(sensor_positions, sensor_readings):
+def form_contact_image(sensor_positions, sensor_readings, resolution):
     """
     Form the contact image from the sensor positions and the sensor readings
 
@@ -172,6 +172,7 @@ def form_contact_image(sensor_positions, sensor_readings):
 
     :param sensor_positions: list of sensor positions (x, y, z)
     :param sensor_readings: list of sensor stress readings
+    :param resolution: resolution of the contact image
     :return: the contact image for this reading
     """
 
@@ -187,10 +188,9 @@ def form_contact_image(sensor_positions, sensor_readings):
     x_min, y_min = min(uv[:, 0]), min(uv[:, 1])
     x_max, y_max = max(uv[:, 0]), max(uv[:, 1])
 
-    RESOLUTION = 8
-    resolution_x = int((x_max - x_min) * RESOLUTION)
-    resolution_y = int((y_max - y_min) * RESOLUTION)
-    print(resolution_x, resolution_y)
+    resolution_x = int((x_max - x_min) * resolution)
+    resolution_y = int((y_max - y_min) * resolution)
+    print("image dimensions: ", resolution_x, "x", resolution_y, "pixels")
 
     # Create a meshgrid for the image
     X = np.linspace(start=x_min, stop=x_max, num=resolution_x)
@@ -209,7 +209,7 @@ def form_contact_image(sensor_positions, sensor_readings):
             image[r, c] = get_pixel_color(sensor_readings, p_rc)
 
     # Map the grid onto the image
-    show_image(image, uv, triangles)
+    show_image(image)
 
     return image
 

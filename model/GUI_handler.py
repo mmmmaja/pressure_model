@@ -182,7 +182,7 @@ class GUI:
         self.plotter.main_menu.addAction(self.stop_record_action)
 
     def start_recording(self):
-        self.recording = Recording(self.sensors, file_name='recording.csv')
+        self.recording = Recording(self.sensors, file_name='sphere_contact.csv')
         self.recording.start()
         self.update_recording_actions()
 

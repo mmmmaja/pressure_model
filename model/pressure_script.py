@@ -91,7 +91,7 @@ def is_inside(vertex, vertex_coordinates):
 
 class StimuliPressure(PressureHandler):
 
-    def __init__(self, stimuli, pressure_strength, material):
+    def __init__(self, stimuli, pressure_strength):
         """
         Force that is applied to the mesh with a stimulus
         :param stimuli: Stimuli object that has its own pressure function specified
@@ -100,7 +100,6 @@ class StimuliPressure(PressureHandler):
         super().__init__()
         self.stimuli = stimuli
         self.pressure_strength = pressure_strength
-        self.material = material
 
     def get_pressure(self, vertex_coordinates: np.ndarray) -> float:
         # Scale the force with the force strength
@@ -178,7 +177,7 @@ def apply_stimuli_pressure(gui, stimuli, picker, cell_id, relaxation=True):
     # Recompute the position of the stimuli based on the cell that was picked
     if stimuli.recompute_position(picker, cell_id):
         # This object will handle assigning the pressure to the vertices
-        force_handler = StimuliPressure(stimuli, gui.PRESSURE, gui.mesh_material)
+        force_handler = StimuliPressure(stimuli, gui.PRESSURE)
         # Apply the pressure to the mesh, start the FENICS computation
         apply_pressure(gui, force_handler, relaxation)
 

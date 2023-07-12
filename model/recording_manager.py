@@ -3,6 +3,9 @@ import random
 from datetime import datetime
 from PyQt5.QtCore import QTimer
 
+from model.fenics import FENICS
+from model.pressure_script import StimuliPressure
+
 
 class Recording:
 
@@ -44,6 +47,7 @@ class Recording:
         Form of the csv file:
             First line: sensor positions  -> x y z | x y z | x y z | ...
             Rest of the file: sensor data -> stress | stress | stress | ...
+            First column: time
         """
 
         if self.file_name is None:
@@ -54,6 +58,8 @@ class Recording:
 
         print("Saving data to: " + file_name)
 
+        time = [i * self.dt for i in range(len(self.sensor_data))]
+
         # Save the data to a .csv file
         # The first line of the file should be the sensor positions
         sensor_positions = []
@@ -62,6 +68,7 @@ class Recording:
             sensor_positions.append(
                 str(position[0]) + ' ' + str(position[1]) + ' ' + str(position[2])
             )
+
         # The rest of the file should be the pressure data
         path = self.FOLDER_PATH + '/' + file_name
         with open(path, 'w', newline='') as file:
@@ -72,40 +79,48 @@ class Recording:
 
 class ArtificialRecording(Recording):
 
-    def __init__(self, sensors, mesh_boost, dt=100, file_name=None):
+    PRESSURE = 10
+
+    def __init__(self, sensors, mesh_boost, rank_material, stimuli, dt=100, file_name=None):
 
         super().__init__(sensors, dt, file_name)
 
-        self.cells = self.get_available_cells(mesh_boost)
+        self.mesh_boost = mesh_boost
+        self.rank_material = rank_material
+        self.stimuli = stimuli
+
+        self.vertices = self.get_available_vertices()
+
         self.simulate_random_press()
 
-    def valid_cell(self, cell, vertex_id_range):
-        counter = 0
-        point_ids = cell.GetPointIds()
-        for i in range(point_ids.GetNumberOfIds()):
-            point_id = point_ids.GetId(i)
-            if point_id in vertex_id_range:
-                counter += 1
-        if counter >= 4:
-            return True
+    def get_available_vertices(self):
+        """
+        Find the facets of hexahedrons that are on the top face of the mesh
+        :return: List of available vertices that are consist of top facets of the mesh
+        """
 
-    def get_available_cells(self, mesh_boost):
+        vertex_id_range = self.mesh_boost.top_region_ids
+        for i in vertex_id_range:
+            self.mesh_boost.current_vtk
 
-        vertex_id_range = mesh_boost.top_region_ids
-
-        available_cells = []
-        # Get the cell data of the mesh
-        for cell_id in range(mesh_boost.current_vtk.n_cells):
-            cell = mesh_boost.current_vtk.get_cell(cell_id)
-            if self.valid_cell(cell, vertex_id_range):
-                available_cells.append(cell)
-        return available_cells
+        # available_vertices = []
+        # # Get the cell data of the mesh
+        # for cell_id in range(mesh_boost.current_vtk.n_cells):
+        #     cell = mesh_boost.current_vtk.get_cell(cell_id)
+        #     if self.valid_cell(cell, vertex_id_range):
+        #         #
+        #         available_cells.append(cell)
+        # return available_cells
 
     def simulate_random_press(self):
-        # Make a radnom choice and them map it to the enclosing facet!!! look recompute position in stimuli
+        # Make a random choice of coordinates for the stimuli
         # Pick a random cell
-        cell = random.choice(self.cells)
-        print('Cell: ', cell)
+        vertex = random.choice(self.vertices)
+
+        coords = None
+
+        self.stimuli.position = coords
+        self.apply_pressure()
     #
     # def simulate_smooth_press(self):
     #     global ACTIVATION_THRESHOLD
@@ -164,3 +179,11 @@ class ArtificialRecording(Recording):
     #         0]
     #
     #     self.stimuli.set_frame_position(position)
+
+
+    def apply_pressure(self):
+        force_handler = StimuliPressure(self.stimuli, self.PRESSURE)
+        fenics = FENICS(self.mesh_boost.sfepy_mesh, self.rank_material, self.sensors)
+
+        # Calculate the displacement
+        fenics.apply_pressure(force_handler)
