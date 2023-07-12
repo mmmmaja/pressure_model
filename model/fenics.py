@@ -276,7 +276,7 @@ class SfepyMesh:
             return False
         return True
 
-    def validate(self, threshold=0.035):
+    def validate(self, threshold=0.00135):
         """
         Validate the mesh by checking the determinant of the Jacobian matrix at each point of the mesh.
         :param threshold: The threshold for the determinant of the Jacobian matrix

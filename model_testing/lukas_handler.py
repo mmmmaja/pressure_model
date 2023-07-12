@@ -35,6 +35,15 @@ nds_backBottomY = [0.000, 0.000, 7.500, 7.500, 7.500, 15.000, 15.000, 22.500, 22
 def get_sensor_positions():
     sensor_coords = []
 
+    # for i in range(len(nds_backTopX)):
+    #     sensor_coords.append([
+    #         nds_backTopX[i], nds_backTopY[i], 0.0
+    #     ])
+    # for i in range(len(nds_backBottomX)):
+    #     sensor_coords.append([
+    #         nds_backBottomX[i], nds_backBottomY[i], 0.0
+    #     ])
+
     for i in range(len(nds_frontX)):
         sensor_coords.append([
             nds_frontX[i], nds_frontY[i], 0.0
@@ -56,6 +65,9 @@ def plot_sensor_positions():
     ax.scatter(x, y, z)
 
     plt.show()
+
+
+plot_sensor_positions()
 
 
 def read_lukas_recording(path):

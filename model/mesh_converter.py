@@ -93,6 +93,8 @@ class MeshBoost:
         """
 
         sfepy_mesh = SfepyMesh(self)
+        # sfepy_mesh.create()
+        # return sfepy_mesh
 
         # Check the validity of the mesh
         if not sfepy_mesh.create():
@@ -205,7 +207,7 @@ class ArmMesh(MeshBoost):
 
     # Thickness of the mesh
     # Make sure that thickness is not too big ( otherwise the mesh will crash :( )
-    THICKNESS = 0.95
+    THICKNESS = 1.2
 
     OBJ_PATH = '../meshes/model_kfadrat.obj'
 

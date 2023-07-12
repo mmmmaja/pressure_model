@@ -26,7 +26,7 @@ class GUI:
         # Define the pressure
         self.PRESSURE = 0.02
         # Change in the pressure when on the event
-        self.pressure_dt = 0.05
+        self.pressure_dt = 0.01
 
         # Define all the actors present in the scene
         self.mesh_actor = None
@@ -182,7 +182,7 @@ class GUI:
         self.plotter.main_menu.addAction(self.stop_record_action)
 
     def start_recording(self):
-        self.recording = Recording(self.sensors, file_name='sphere_contact.csv')
+        self.recording = Recording(self.sensors, file_name='cylinder_contact.csv')
         self.recording.start()
         self.update_recording_actions()
 

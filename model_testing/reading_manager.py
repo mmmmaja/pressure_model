@@ -170,20 +170,19 @@ def distribution_analysis(sensor_readings):
     plt.show()
 
 
-
-pos, rec = read_csv('../recordings/recording.csv')
+pos, rec = read_csv('../recordings/cylinder_contact.csv')
 reader_maja = ReadingManager(pos, rec)
 # reader_maja.get_statistics()
-# reader_maja.visualize()
+reader_maja.create_image(resolution=4, frame_index=reader_maja.get_descriptive_frame())
 
 
-pos, rec = read_lukas_recording(
-    "C:/Users/majag/Desktop/arm_data/sphere/1_LIN.xlsx"
-)
-reader_lukas = ReadingManager(pos, rec)
-reader_lukas.identify_faulty_sensors()
-# reader_lukas.get_statistics()
-reader_lukas.create_image()
-
-distribution_analysis(reader_maja.sensor_reading)
-distribution_analysis(reader_lukas.sensor_reading)
+# pos, rec = read_lukas_recording(
+#     "C:/Users/majag/Desktop/arm_data/sphere/1_LIN.xlsx"
+# )
+# reader_lukas = ReadingManager(pos, rec)
+# reader_lukas.identify_faulty_sensors()
+# # reader_lukas.get_statistics()
+# reader_lukas.create_image()
+#
+# distribution_analysis(reader_maja.sensor_reading)
+# distribution_analysis(reader_lukas.sensor_reading)

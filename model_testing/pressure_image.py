@@ -209,7 +209,7 @@ def form_contact_image(sensor_positions, sensor_readings, resolution):
             image[r, c] = get_pixel_color(sensor_readings, p_rc)
 
     # Map the grid onto the image
-    show_image(image)
+    show_image(image, uv, triangles)
 
     return image
 

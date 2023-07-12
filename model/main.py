@@ -56,17 +56,17 @@ if not TERMINAL_OUTPUT:
 
 app = QApplication(sys.argv)
 
-_mesh_boost = GridMesh(30, 30, z_function=flat, layers=3)
-_sensors = SensorGrid(12, 12, _mesh_boost)
+# _mesh_boost = GridMesh(30, 30, z_function=flat, layers=3)
+# _sensors = SensorGrid(12, 12, _mesh_boost)
 # _sensors = RandomSensors(20, _mesh_boost)
 
-# _mesh_boost = ArmMesh()
-# _sensors = SensorArm(_mesh_boost)
+_mesh_boost = ArmMesh()
+_sensors = SensorArm(_mesh_boost)
 # _sensors = SensorPatchesFromFile("../patches/circle.csv", _mesh_boost, n_patches=4)
 
-# _stimuli = Cylinder(radius=4.0, height=1.0)
+# _stimuli = Cylinder(radius=5.0, height=1.0)
 # _stimuli = Cuboid(6.0, 4.0, 2.0)
-_stimuli = Sphere(radius=2.0)
+_stimuli = Sphere(radius=0.8)
 
 
 # force_handler = pressure_script.StimuliPressure(_stimuli, 10, rubber)
