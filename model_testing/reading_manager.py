@@ -6,6 +6,10 @@ from model_testing.lukas_handler import read_lukas_recording
 from model_testing.model_validation import TimeSeriesAnalysis
 from model_testing.pressure_image import form_contact_image
 from model_testing.surface_flattening import orthographic_projection
+from surface_flattening import *
+import pandas as pd
+import seaborn as sns
+import matplotlib.ticker as ticker
 
 
 def read_csv(path):
@@ -40,7 +44,7 @@ def read_csv(path):
 
 class ReadingManager:
 
-    def __init__(self, sensor_positions, sensor_reading, time):
+    def __init__(self, sensor_positions, sensor_reading, time, mapping=orthographic_projection):
         """
         Visualizes the recording from a csv file
         """
@@ -48,7 +52,7 @@ class ReadingManager:
         self.sensor_reading = sensor_reading
         self.time = time
 
-        self.mapping = orthographic_projection(self.sensor_positions)
+        self.sensor_positions_mapping = mapping(self.sensor_positions)
 
         # (num_measurements, num_sensors)
         print('shape of readings: ', self.sensor_reading.shape)
@@ -58,7 +62,7 @@ class ReadingManager:
         Set the mapping from the sensor readings to the pressure image
         :param mapping: mapping from the sensor readings to the pressure image
         """
-        self.mapping = mapping
+        self.sensor_positions_mapping = mapping
 
     def visualize(self, sleep_time=0.4, index=None):
         """
@@ -82,8 +86,8 @@ class ReadingManager:
         norm = colors.Normalize(vmin=min_z, vmax=max_z)
 
         # Extract sensor positions
-        x_values = np.array([float(x[0]) for x in self.sensor_positions])
-        y_values = np.array([float(y[1]) for y in self.sensor_positions])
+        x_values = np.array([float(x[0]) for x in self.sensor_positions_mapping])
+        y_values = np.array([float(y[1]) for y in self.sensor_positions_mapping])
 
         # Create a meshgrid for X and Y
         xi = np.linspace(min(x_values), max(x_values), 100)
@@ -126,7 +130,7 @@ class ReadingManager:
     def create_image(self, resolution=3, frame_index=None):
         if frame_index is None:
             frame_index = len(self.sensor_reading) // 2 + 2
-        form_contact_image(self.sensor_positions, self.sensor_reading[frame_index], resolution)
+        form_contact_image(self.sensor_positions_mapping, self.sensor_reading[frame_index], resolution)
 
     def identify_faulty_sensors(self, threshold_std=1e-5, threshold_mean_factor=5):
 
@@ -178,6 +182,71 @@ class ReadingManager:
         print(f"Min pressure: {min_pressure}")
         print(f"Max pressure: {max_pressure}")
 
+    def plot_time_series(self, average=False):
+        sns.set_style('darkgrid')
+        sns.set(rc={'figure.figsize': (10, 6)})
+
+        # Create a dataframe with the sensor readings
+        sensor_reading_df = pd.DataFrame()
+        sensor_reading_df['Time'] = self.time
+        for i in range(self.sensor_reading.shape[1]):
+            sensor_reading_df[f'Sensor {i}'] = self.sensor_reading[:, i]
+
+        # Add the column for average sensor reading for the frame
+        sensor_reading_df['Average'] = sensor_reading_df.mean(axis=1)
+
+        # Add the colum for the variance of the sensor readings for the frame
+        sensor_reading_df['Variance'] = sensor_reading_df.var(axis=1)
+
+        # Find the sensor with overall highest output
+        max_sensor = np.argmax(np.max(self.sensor_reading, axis=0))
+
+        # Add the column for the sensor with the highest output
+        sensor_reading_df['Max Sensor'] = self.sensor_reading[:, max_sensor]
+
+        if average:
+            palette = sns.color_palette("mako_r", 4)
+
+            ax = sns.lineplot(
+                data=sensor_reading_df,
+                x='Time', y='Average',
+                markers=True, color=palette[0],
+                dashes=False, label='Average sensor output', linewidth=2.0
+            )
+            # Add the variance
+            ax.fill_between(
+                sensor_reading_df['Time'], sensor_reading_df['Average'] - sensor_reading_df['Variance'],
+                sensor_reading_df['Average'] + sensor_reading_df['Variance'],
+                alpha=0.2, color=palette[1], label='Variance')
+
+            # Add the max sensor output
+            ax.plot(
+                sensor_reading_df['Time'],
+                sensor_reading_df['Max Sensor'],
+                color=palette[2], linestyle='--',
+                label='Max sensor output',
+                linewidth=1.0
+            )
+
+            # Add legend
+            plt.legend()
+
+        else:
+
+            ax = sns.lineplot(data=self.sensor_reading,
+                              palette='plasma',
+                              dashes=False, legend=False, linewidth=1.5,
+                              hue='Time')
+
+            # Add the indicator for the maximum output
+            max_frame = self.get_descriptive_frame()
+            ax.axvline(x=max_frame, color='grey', linestyle='--', label='Maximum output')
+
+        plt.ylabel('Force [N]')
+
+        plt.xlabel('Seconds')
+        plt.show()
+
 
 def distribution_analysis(sensor_readings):
 
@@ -217,9 +286,9 @@ def get_chosen_time_frames(sensor_readings, readings_time_frame, desired_time_fr
 
 pos_m, rec_m, time_m = read_csv('../recordings/arm_sphere_contact.csv')
 pos_l, rec_l, time_l = read_lukas_recording(
-    "C:/Users/majag/Desktop/arm_data/short/sphere_sensor_press_2_LIN.xlsx"
+    "C:/Users/majag/Desktop/arm_data/short/sphere_sensor_press_1_LIN.xlsx"
 )
-# cropped_rec_m = get_chosen_time_frames(rec_m, time_m, time_l)
+cropped_rec_m = get_chosen_time_frames(rec_m, time_m, time_l)
 #
 # analysis = TimeSeriesAnalysis(rec_l, cropped_rec_m)
 # analysis.multivariate_distance_metrics()
@@ -227,22 +296,18 @@ pos_l, rec_l, time_l = read_lukas_recording(
 # analysis.correlation_matrices()
 
 
-# pos, rec, time = read_lukas_recording(
-#     "C:/Users/majag/Desktop/arm_data/short/sphere_sensor_press_2_LIN.xlsx"
-# )
-reader_maja = ReadingManager(pos_m, rec_m, time_m)
+reader_maja = ReadingManager(pos_m, cropped_rec_m, time_l, mapping=projection_onto_grid_positions)
 frame_index_m = reader_maja.get_descriptive_frame()
+reader_maja.plot_time_series(average=True)
 print(frame_index_m)
 # reader_maja.create_image(resolution=4, frame_index=frame_index_m)
-reader_maja.visualize(index=frame_index_m)
+# reader_maja.visualize(index=frame_index_m)
 
 
-# pos, rec, time = read_lukas_recording(
-#     "C:/Users/majag/Desktop/arm_data/short/sphere_sensor_press_2_LIN.xlsx"
-# )
 reader_lukas = ReadingManager(pos_l, rec_l, time_l)
 reader_lukas.identify_faulty_sensors()
-frame_index_l=reader_lukas.get_descriptive_frame()
+reader_lukas.plot_time_series(average=True)
+frame_index_l = reader_lukas.get_descriptive_frame()
 print(frame_index_l)
 # reader_lukas.create_image(resolution=2, frame_index=reader_lukas.get_descriptive_frame())
 reader_lukas.visualize(index=frame_index_l)

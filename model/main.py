@@ -65,7 +65,7 @@ _sensors = SensorArm(_mesh_boost)
 # _sensors = SensorPatchesFromFile("../patches/circle.csv", _mesh_boost, n_patches=4)
 
 # _stimuli = Cylinder(radius=5.0, height=1.0)
-# _stimuli = Cuboid(5.0, 4.0, 2.0)
+# _stimuli = Cuboid(2.0, 4.0, 2.0)
 _stimuli = Sphere(radius=1.6)
 
 

@@ -1,4 +1,9 @@
-from surface_flattening import *
+import math
+import numpy as np
+from matplotlib import pyplot as plt
+from scipy.spatial import Delaunay
+
+from model_testing.surface_flattening import plot_mesh_2D
 
 
 def encloses(triangle, point):
@@ -138,21 +143,20 @@ def show_image(image, uv=None, triangles=None):
     plt.show()
 
 
-def form_contact_image(sensor_positions, sensor_readings, resolution):
+def form_contact_image(sensor_positions_2D, sensor_readings, resolution):
     """
     Form the contact image from the sensor positions and the sensor readings
 
     Made based on the paper:
     Human Hand Recognition From Robotic Skin Measurements in Human-Robot Physical Interactions
 
-    :param sensor_positions: list of sensor positions (x, y, z)
+    :param sensor_positions_2D: Mapping of the sensor positions onto 2D space
     :param sensor_readings: list of sensor stress readings
     :param resolution: resolution of the contact image
     :return: the contact image for this reading
     """
 
-    # Get the projection of the sensor positions onto 2D space
-    uv = projection_onto_grid_positions(sensor_positions)
+    uv = sensor_positions_2D
 
     # Perform a 3D Delaunay triangulation on the sensor positions
     triangles = Delaunay(uv).simplices

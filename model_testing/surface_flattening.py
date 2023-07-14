@@ -132,7 +132,7 @@ def projection_onto_grid_positions(sensor_positions):
     grid_positions = np.array([nds_frontX, nds_frontY]).T
 
     # Display the initial meshes
-    plot_meshes_2D(sensor_positions_flattened, grid_positions)
+    # plot_meshes_2D(sensor_positions_flattened, grid_positions)
 
     # Map the sensor positions to the grid positions
 
@@ -147,7 +147,7 @@ def projection_onto_grid_positions(sensor_positions):
     sensor_positions_flattened[:, 0] = sensor_positions_flattened[:, 0] * scale_x
     sensor_positions_flattened[:, 1] = sensor_positions_flattened[:, 1] * scale_y
 
-    plot_meshes_2D(sensor_positions_flattened, grid_positions)
+    # plot_meshes_2D(sensor_positions_flattened, grid_positions)
 
     # TRANSLATION
     # Compute the centroids
@@ -162,9 +162,9 @@ def projection_onto_grid_positions(sensor_positions):
     sensor_positions_flattened[:, 0] = sensor_positions_flattened[:, 0] + translation_x
     sensor_positions_flattened[:, 1] = sensor_positions_flattened[:, 1] + translation_y
 
-    plot_meshes_2D(sensor_positions_flattened, grid_positions)
-
-    plot_mesh_2D(sensor_positions_flattened, centroid=True)
+    # plot_meshes_2D(sensor_positions_flattened, grid_positions)
+    #
+    # plot_mesh_2D(sensor_positions_flattened, centroid=True)
 
     # Find the closest grid position for each sensor position
     # Start from the middle of the grid because that is where there is less distortion
@@ -193,6 +193,6 @@ def projection_onto_grid_positions(sensor_positions):
     # Convert the mapped positions to a numpy array
     mapped_positions = np.array(mapped_positions)
 
-    plot_mesh_2D(mapped_positions)
+    # plot_mesh_2D(mapped_positions)
 
     return mapped_positions
