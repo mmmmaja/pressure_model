@@ -47,7 +47,7 @@ class Recording:
         Form of the csv file:
             First line: sensor positions  -> x y z | x y z | x y z | ...
             Rest of the file: sensor data -> stress | stress | stress | ...
-            First column: time
+            LAST column: time
         """
 
         if self.file_name is None:
@@ -74,4 +74,6 @@ class Recording:
         with open(path, 'w', newline='') as file:
             writer = csv.writer(file)
             writer.writerow(sensor_positions)
-            writer.writerows(self.sensor_data)
+            for i in range(len(self.sensor_data)):
+                writer.writerow(self.sensor_data[i] + [time[i]])
+            # writer.writerows(self.sensor_data)

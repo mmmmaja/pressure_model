@@ -1,8 +1,4 @@
-import math
-
-import numpy as np
-from matplotlib import pyplot as plt
-from scipy.spatial import Delaunay
+from surface_flattening import *
 
 
 def encloses(triangle, point):
@@ -142,27 +138,6 @@ def show_image(image, uv=None, triangles=None):
     plt.show()
 
 
-def plot_mesh_2D(uv, triangles):
-    plt.figure()
-
-    # add edges
-    for tri in triangles:
-        i, j, k = tri
-        # Use magenta thin lines for the edges
-        plt.plot([uv[i, 0], uv[j, 0]], [uv[i, 1], uv[j, 1]], color='m', linewidth=0.5)
-        plt.plot([uv[j, 0], uv[k, 0]], [uv[j, 1], uv[k, 1]], color='m', linewidth=0.5)
-        plt.plot([uv[k, 0], uv[i, 0]], [uv[k, 1], uv[i, 1]], color='m', linewidth=0.5)
-
-    # scatter plot of vertices
-    plt.scatter(uv[:, 0], uv[:, 1])
-
-    plt.show()
-
-
-def orthographic_projection(sensor_positions):
-    return sensor_positions[:, :2]
-
-
 def form_contact_image(sensor_positions, sensor_readings, resolution):
     """
     Form the contact image from the sensor positions and the sensor readings
@@ -177,12 +152,12 @@ def form_contact_image(sensor_positions, sensor_readings, resolution):
     """
 
     # Get the projection of the sensor positions onto 2D space
-    uv = orthographic_projection(sensor_positions)
+    uv = projection_onto_grid_positions(sensor_positions)
 
     # Perform a 3D Delaunay triangulation on the sensor positions
     triangles = Delaunay(uv).simplices
 
-    # plot_mesh_2D(uv, triangles)
+    plot_mesh_2D(uv, triangles)
 
     # Create a grid for the image
     x_min, y_min = min(uv[:, 0]), min(uv[:, 1])

@@ -271,7 +271,10 @@ class SensorArm(SensorParent):
     def create_sensors(self):
         sensors = []
         # Load the input points from the .obj file
-        points = pyvista.read('../meshes/sensors.obj').points
+        points = pyvista.read('../meshes/sensors.obj')
+
+        points = points.rotate_y(270).points
+
         for i in range(points.shape[0]):
             # Map the points to the closest vertex in the mesh
             sensor_index = self.map_vertex_ids(points[i])

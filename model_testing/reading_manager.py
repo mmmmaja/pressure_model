@@ -2,9 +2,10 @@ import numpy as np
 from matplotlib import pyplot as plt
 import matplotlib.colors as colors
 from scipy.interpolate import griddata
-
 from model_testing.lukas_handler import read_lukas_recording
+from model_testing.model_validation import TimeSeriesAnalysis
 from model_testing.pressure_image import form_contact_image
+from model_testing.surface_flattening import orthographic_projection
 
 
 def read_csv(path):
@@ -14,7 +15,7 @@ def read_csv(path):
     :return: sensor_positions, sensor_readings lists
     """
     index = 0
-    sensor_positions, sensor_readings = [], []
+    sensor_positions, sensor_readings, time = [], [], []
     with open(path, 'r', newline='') as file:
         for row in file.readlines():
             # First row contains position of the sensors
@@ -26,29 +27,44 @@ def read_csv(path):
                     sensor_positions[i] = [float(x) for x in sensor_positions[i]]
             # The rest of the rows contain the sensor readings
             else:
+                # Last column is the time
                 str_row = row.split(',')
                 # Convert from string to float
                 float_row = [float(x) for x in str_row]
-                sensor_readings.append(float_row)
+                # Convert time to seconds
+                time.append(float_row[-1] / 1000)
+                sensor_readings.append(float_row[:-1])
             index += 1
-    return np.array(sensor_positions), np.array(sensor_readings) * (-1)
+    return np.array(sensor_positions), np.array(sensor_readings) * (-1), np.array(time)
 
 
 class ReadingManager:
 
-    def __init__(self, sensor_positions, sensor_reading):
+    def __init__(self, sensor_positions, sensor_reading, time):
         """
         Visualizes the recording from a csv file
         """
         self.sensor_positions = sensor_positions
         self.sensor_reading = sensor_reading
+        self.time = time
+
+        self.mapping = orthographic_projection(self.sensor_positions)
+
         # (num_measurements, num_sensors)
         print('shape of readings: ', self.sensor_reading.shape)
 
-    def visualize(self, sleep_time=0.4):
+    def set_mapping(self, mapping):
+        """
+        Set the mapping from the sensor readings to the pressure image
+        :param mapping: mapping from the sensor readings to the pressure image
+        """
+        self.mapping = mapping
+
+    def visualize(self, sleep_time=0.4, index=None):
         """
         Visualize the sensor readings with the 3D surface plot
         :param sleep_time: time to sleep between each frame
+        :param index: index of the frame to visualize
         """
 
         # Create a 3D plot
@@ -75,6 +91,11 @@ class ReadingManager:
         X, Y = np.meshgrid(xi, yi)
 
         for i in range(len(self.sensor_reading)):
+
+            # If index is specified, only show that frame
+            if index is not None:
+                i = index
+
             # Clear previous plot
             ax.clear()
 
@@ -90,14 +111,14 @@ class ReadingManager:
             # Plot the surface
             ax.plot_surface(X, Y, Z, rstride=1, cstride=1, cmap='plasma', edgecolor='none', norm=norm)
 
-            # Add text to the plot with the current iteration
-            ax.text2D(0.05, 0.95, f'Frame {i}', transform=ax.transAxes)
+            # Add text to the plot with the current time of the recording
+            ax.text2D(0.05, 0.95, f"Time: {self.time[i]} s", transform=ax.transAxes)
 
             plt.draw()
             plt.pause(sleep_time)
 
             # Close the plot if all the frames have been shown
-            if i == len(self.sensor_reading) - 1:
+            if i == len(self.sensor_reading) - 1 and index is None:
                 plt.close()
 
         plt.show()
@@ -170,19 +191,70 @@ def distribution_analysis(sensor_readings):
     plt.show()
 
 
-pos, rec = read_csv('../recordings/cylinder_contact.csv')
-reader_maja = ReadingManager(pos, rec)
-# reader_maja.get_statistics()
-reader_maja.create_image(resolution=4, frame_index=reader_maja.get_descriptive_frame())
+def get_chosen_time_frames(sensor_readings, readings_time_frame, desired_time_frames):
+    """
+    Get the sensor readings for the desired time frames
+    Find time frames as close as possible to the desired time frames
+    :param sensor_readings: (num_measurements, num_sensors)
+    :param readings_time_frame:
+    :param desired_time_frames:
+    :return:
+    """
+
+    chosen_time_frames = []
+    desired_time_frame_index = 0
+    for i in range(sensor_readings.shape[0]):
+        if desired_time_frame_index == len(desired_time_frames):
+            break
+        time_frame = readings_time_frame[i]
+        if time_frame >= desired_time_frames[desired_time_frame_index]:
+            chosen_time_frames.append(sensor_readings[i])
+            desired_time_frame_index += 1
+
+    cropped_recording = np.array(chosen_time_frames)
+    return cropped_recording
 
 
-# pos, rec = read_lukas_recording(
-#     "C:/Users/majag/Desktop/arm_data/sphere/1_LIN.xlsx"
-# )
-# reader_lukas = ReadingManager(pos, rec)
-# reader_lukas.identify_faulty_sensors()
-# # reader_lukas.get_statistics()
-# reader_lukas.create_image()
+pos_m, rec_m, time_m = read_csv('../recordings/arm_sphere_contact.csv')
+pos_l, rec_l, time_l = read_lukas_recording(
+    "C:/Users/majag/Desktop/arm_data/short/sphere_sensor_press_2_LIN.xlsx"
+)
+# cropped_rec_m = get_chosen_time_frames(rec_m, time_m, time_l)
 #
+# analysis = TimeSeriesAnalysis(rec_l, cropped_rec_m)
+# analysis.multivariate_distance_metrics()
+# # analysis.plot_3D_data(pos_l, pos_m)
+# analysis.correlation_matrices()
+
+
+# pos, rec, time = read_lukas_recording(
+#     "C:/Users/majag/Desktop/arm_data/short/sphere_sensor_press_2_LIN.xlsx"
+# )
+reader_maja = ReadingManager(pos_m, rec_m, time_m)
+frame_index_m = reader_maja.get_descriptive_frame()
+print(frame_index_m)
+# reader_maja.create_image(resolution=4, frame_index=frame_index_m)
+reader_maja.visualize(index=frame_index_m)
+
+
+# pos, rec, time = read_lukas_recording(
+#     "C:/Users/majag/Desktop/arm_data/short/sphere_sensor_press_2_LIN.xlsx"
+# )
+reader_lukas = ReadingManager(pos_l, rec_l, time_l)
+reader_lukas.identify_faulty_sensors()
+frame_index_l=reader_lukas.get_descriptive_frame()
+print(frame_index_l)
+# reader_lukas.create_image(resolution=2, frame_index=reader_lukas.get_descriptive_frame())
+reader_lukas.visualize(index=frame_index_l)
+
+
 # distribution_analysis(reader_maja.sensor_reading)
 # distribution_analysis(reader_lukas.sensor_reading)
+
+
+"""
+https://www.researchgate.net/publication/224230704_Tactile-Object_Recognition_From_Appearance_Information
+
+Characterization and simulation of tactile sensors
+https://pure.johnshopkins.edu/en/publications/characterization-and-simulation-of-tactile-sensors-4
+"""

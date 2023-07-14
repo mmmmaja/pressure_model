@@ -6,8 +6,7 @@ from sfepy.mechanics.matcoefs import stiffness_from_youngpoisson, lame_from_youn
 _colors = [
     '#e2a4ff',
     '#39ddff',
-    '#63ffe1',
-    '#ff9a9a'
+    '#63ffe1'
 ]
 silicon_color = random.choice(_colors)
 rubber_color = '2dc2ff'

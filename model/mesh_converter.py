@@ -1,4 +1,6 @@
 import pyvista
+import vtk
+
 from model.fenics import SfepyMesh
 from abc import abstractmethod
 import numpy as np
@@ -222,6 +224,8 @@ class ArmMesh(MeshBoost):
 
         # Load the input mesh
         mesh = pv.read(self.OBJ_PATH)
+
+        mesh = mesh.rotate_y(270)
 
         # Compute normals for each face
         normals = mesh.face_normals
