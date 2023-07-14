@@ -198,8 +198,10 @@ class ReadingManager:
         # Add the colum for the variance of the sensor readings for the frame
         sensor_reading_df['Variance'] = sensor_reading_df.var(axis=1)
 
-        # Find the sensor with overall highest output
-        max_sensor = np.argmax(np.max(self.sensor_reading, axis=0))
+        # Get the average sensor reading for each sensor
+        sensor_means = sensor_reading_df.mean(axis=0)
+        # Get the index of the sensor with the highest average output
+        max_sensor = np.argmax(sensor_means)
 
         # Add the column for the sensor with the highest output
         sensor_reading_df['Max Sensor'] = self.sensor_reading[:, max_sensor]
@@ -288,7 +290,7 @@ pos_m, rec_m, time_m = read_csv('../recordings/arm_sphere_contact.csv')
 pos_l, rec_l, time_l = read_lukas_recording(
     "C:/Users/majag/Desktop/arm_data/short/sphere_sensor_press_1_LIN.xlsx"
 )
-cropped_rec_m = get_chosen_time_frames(rec_m, time_m, time_l)
+# cropped_rec_m = get_chosen_time_frames(rec_m, time_m, time_l)
 #
 # analysis = TimeSeriesAnalysis(rec_l, cropped_rec_m)
 # analysis.multivariate_distance_metrics()
@@ -296,12 +298,12 @@ cropped_rec_m = get_chosen_time_frames(rec_m, time_m, time_l)
 # analysis.correlation_matrices()
 
 
-reader_maja = ReadingManager(pos_m, cropped_rec_m, time_l, mapping=projection_onto_grid_positions)
+reader_maja = ReadingManager(pos_m, rec_m, time_m)
 frame_index_m = reader_maja.get_descriptive_frame()
 reader_maja.plot_time_series(average=True)
-print(frame_index_m)
-# reader_maja.create_image(resolution=4, frame_index=frame_index_m)
-# reader_maja.visualize(index=frame_index_m)
+reader_maja.visualize()
+reader_maja.create_image(resolution=2, frame_index=frame_index_m)
+
 
 
 reader_lukas = ReadingManager(pos_l, rec_l, time_l)

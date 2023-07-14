@@ -24,7 +24,7 @@ class GUI:
         self.sensors = sensors
 
         # Define the pressure
-        self.PRESSURE = 0.82
+        self.PRESSURE = 0.001
         # Change in the pressure when on the event
         self.pressure_dt = 0.01
 
@@ -182,7 +182,7 @@ class GUI:
         self.plotter.main_menu.addAction(self.stop_record_action)
 
     def start_recording(self):
-        self.recording = Recording(self.sensors, file_name='arm_sphere_contact.csv')
+        self.recording = Recording(self.sensors, file_name='lukas.csv')
         self.recording.start()
         self.update_recording_actions()
 

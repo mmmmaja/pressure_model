@@ -241,6 +241,7 @@ def transform_mesh(vtk_mesh):
     # Load the mesh as a sfepy mesh
     return Mesh.from_file(path)
 
+
 class SfepyMesh:
 
     def __init__(self, mesh_boost):

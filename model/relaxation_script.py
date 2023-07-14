@@ -64,19 +64,14 @@ class StressRelaxation:
             τ is the relaxation time of the material.
         :return: the current displacement dependant of the time t of the simulation
         """
-        return u * np.exp(-t / self.gui.mesh_material.time_constant)
+        return u * self.exponential_decay(t)
 
     def thread_iteration(self):
         self.relax_iteration(self.t)
 
-    def active_iteration(self, t, stimuli):
-        self.relax_iteration(t, stimuli.get_affected_mesh_indices(self.gui.mesh_boost.current_vtk))
-
-    def relax_iteration(self, t, unaffected_points=None):
+    def relax_iteration(self, t):
         """
         :param t: current time of the simulation
-        :param unaffected_points: the points that are not affected by the stress relaxation,
-        because the stimuli is there
 
         This function is called every dt milliseconds
         Updates the displacement of the mesh and the GUI
@@ -87,10 +82,6 @@ class StressRelaxation:
 
         # calculate the displacement
         relaxation = self.get_relaxation_displacement(u, t)
-
-        if unaffected_points:
-            # Set the relaxation of the points that are not affected by the stress relaxation to 0
-            relaxation[unaffected_points] = 0.0
 
         # OVERRIDE the GUI
         self.gui.mesh_boost.override_mesh(relaxation)
@@ -117,4 +108,3 @@ class StressRelaxation:
                 self.relaxation_timer.stop()
                 self.relaxation_timer.deleteLater()
                 self.relaxation_timer = None
-

@@ -12,11 +12,16 @@ To run this project, you will need the following libraries:
 - pyvistaqt [pip](https://pypi.org/project/pyvistaqt/)
 - pyvista [pip](https://pypi.org/project/pyvista/)
 - sfepy [pip](https://pypi.org/project/sfepy/)
+- numpy [pip](https://pypi.org/project/numpy/)
+- pandas [pip](https://pypi.org/project/pandas/)
+- matplotlib [pip](https://pypi.org/project/matplotlib/)
+- scipy [pip](https://pypi.org/project/scipy/)
+- vtk [pip](https://pypi.org/project/vtk/)
 
 You can install these libraries using pip:
 
 ```bash
-pip install PyQt5 pyvistaqt pyvista sfepy
+pip install PyQt5 pyvistaqt pyvista sfepy numpy pandas matplotlib scipy vtk
 ```
 
 ## How to use
@@ -32,19 +37,19 @@ The csv file containing the data will be saved in the same directory as the proj
 This application records sensor data and saves them in a CSV file. The format of the CSV file is as follows:
 
 - The first line contains the sensor positions in the format `x1 y1 z1 | x2 y2 z2 | ...`. Each `x y z` represents the 3D coordinates of a sensor.
-- The rest of the file contains the sensor data in the format `stress1 | stress2 | ...`, where each `stress` value corresponds to the sensor at the same position in the first line.
-- The first column represents time.
+- The rest of the file contains the sensor data in the format `sensor_output1 | sensor_output2 | ...`, where each `sensor_output` value corresponds to the sensor at the same position in the first line.
+- The last column represents time.
 
 Here is an example of how the data is structured in the CSV file:
 
-| Time | Sensor 1 (x,y,z) | Sensor 2 (x,y,z) | Sensor 3 (x,y,z) | ... |
-|------|------------------|------------------|------------------|-----|
-| 0    | stress           | stress           | stress           | ... |
-| 1    | stress           | stress           | stress           | ... |
-| 2    | stress           | stress           | stress           | ... |
-| ...  | ...              | ...              | ...              | ... |
+| Sensor 1 (x,y,z) | Sensor 2 (x,y,z) | Sensor 3 (x,y,z) | ... | Time   |
+|------------------|------------------|------------------|-----|--------|
+| sensor_output    | sensor_output    | sensor_output    | ... | time0  |
+| sensor_output    | sensor_output    | sensor_output    | ... | time1  |
+| sensor_output    | sensor_output    | sensor_output    | ... | time2  |
+| ...              | ...              | ...              | ... | ...    |
 
-Note: Each stress value in the Sensor columns corresponds to the sensor at the same position in the first line.
+Note: Each sensor output value in the Sensor columns corresponds to the sensor at the same position in the first line.
 
 
 

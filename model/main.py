@@ -56,12 +56,12 @@ if not TERMINAL_OUTPUT:
 
 app = QApplication(sys.argv)
 
-# _mesh_boost = GridMesh(30, 30, z_function=concave, layers=3)
-# _sensors = SensorGrid(10, 10, _mesh_boost)
+_mesh_boost = GridMesh(30, 30, z_function=flat, layers=3)
+_sensors = SensorGrid(10, 10, _mesh_boost)
 # _sensors = RandomSensors(20, _mesh_boost)
 
-_mesh_boost = ArmMesh()
-_sensors = SensorArm(_mesh_boost)
+# _mesh_boost = ArmMesh()
+# _sensors = SensorArm(_mesh_boost)
 # _sensors = SensorPatchesFromFile("../patches/circle.csv", _mesh_boost, n_patches=4)
 
 # _stimuli = Cylinder(radius=5.0, height=1.0)
@@ -74,7 +74,7 @@ _stimuli = Sphere(radius=1.6)
 
 # ArtificialRecording(_sensors, _mesh_boost)
 
-Main(_mesh_boost, _stimuli, _sensors, silicon)
+Main(_mesh_boost, _stimuli, _sensors, rubber)
 app.exec_()
 
 
@@ -91,4 +91,8 @@ Check why displacement is 0 when there is contact!!!
 
 https://docs.google.com/document/d/1y1DOSzD8cJKVa9my3Vqec7bWuaSYQyegPPBmfde-MQU/edit
 
+Stress needs to be present during stress relaxation
+Add max pressure per material
+
+Add stress sensors vs strain sensors
 """

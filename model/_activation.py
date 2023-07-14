@@ -20,21 +20,42 @@ class ActivationClass(vtk.vtkInteractorStyleTrackballCamera):
         self.picker = vtk.vtkCellPicker()
         self.picker.AddPickList(self.gui.mesh_actor)
 
+        # Create a timer id for the timer callback
+        self.timer_id = None
+        # Timer interval in ms between each callback
+        self.dt = 50
+
         # Override the default mouse events (disable rotation)
         self.AddObserver("LeftButtonPressEvent", self.left_button_press_event)
         self.AddObserver("MiddleButtonPressEvent", self.middle_button_press_event)
         self.AddObserver("RightButtonPressEvent", self.right_button_press_event)
         self.AddObserver("LeftButtonReleaseEvent", self.left_button_release_event)
-        self.AddObserver("MouseMoveEvent", self.mouse_move_event)
+        # self.AddObserver("MouseMoveEvent", self.mouse_move_event)
 
         super().__init__(*args, **kwargs)
 
     def left_button_press_event(self, obj, event):
-        self.mouse_pressed = True
+
+        # Start a timer callback that triggers every 50 ms (you can adjust this value)
+        self.timer_id = self.GetInteractor().CreateRepeatingTimer(50)
+
+        # Add an observer for the timer event
+        self.AddObserver('TimerEvent', self.timer_callback)
 
     def left_button_release_event(self, obj, event):
+        """
+        Function that is triggered when the left mouse button is released.
+        It destroys the timer that was created in the left_button_press_event function.
+
+        :param obj: object that triggered the event
+        :param event: event that was triggered
+        """
+
+        # Destroy the timer when the mouse button is released
+        if self.timer_id is not None:
+            self.GetInteractor().DestroyTimer(self.timer_id)
+            self.timer_id = None
         self.gui.sensors.relax()
-        self.mouse_pressed = False
 
     def middle_button_press_event(self, obj, event):
         # Disable the middle button events
@@ -44,15 +65,18 @@ class ActivationClass(vtk.vtkInteractorStyleTrackballCamera):
         # Disable the right button events
         pass
 
-    def mouse_move_event(self, obj, event):
+    def timer_callback(self, obj, event):
         """
-        Function that is triggered when the mouse is moved.
-        If self.mouse_pressed is True, it updates the position of the stimuli.
+        Timer callback that is triggered every dt ms.
+        Triggers the pick_cell function which applies a force to the cell that was clicked.
+
+        :param obj: object that triggered the event
+        :param event: event that was triggered
         """
-        if self.mouse_pressed:
-            # Get the mouse coordinates and pick the cell
-            x, y = self.GetInteractor().GetEventPosition()
-            self.pick_cell(x, y)
+        print("Mouse pressed")
+        # Get the mouse coordinates and pick the cell
+        x, y = self.GetInteractor().GetEventPosition()
+        self.pick_cell(x, y)
 
     def pick_cell(self, x, y):
         """

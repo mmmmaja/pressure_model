@@ -2,7 +2,6 @@ import csv
 import random
 from datetime import datetime
 from PyQt5.QtCore import QTimer
-
 from model.fenics import FENICS
 from model.pressure_script import StimuliPressure
 
