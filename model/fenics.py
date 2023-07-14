@@ -203,6 +203,11 @@ class FENICS:
             mode='el_avg',
             copy_materials=False
         )
+        strain = ev(
+            'ev_cauchy_strain.3.Omega(u)',
+            mode='el_avg',
+            copy_materials=False
+        )
         """
         Stress is a measure of the internal forces in a material body. 
         (FORCE PER UNIT AREA)
@@ -217,9 +222,11 @@ class FENICS:
         """
         # Calculate the stress tensor and flatten it
         stress_tensor_np = np.squeeze(np.array(stress.data))
+        # Calculate the strain tensor and flatten it
+        strain_tensor_np = np.squeeze(np.array(strain.data))
 
         for sensor in self.sensors.sensor_list:
-            sensor.set_readings(stress_tensor_np)
+            sensor.set_reading(stress_tensor_np, strain_tensor_np)
 
 
 """

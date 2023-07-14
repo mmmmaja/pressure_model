@@ -80,19 +80,26 @@ app.exec_()
 
 """
 TODO:
-Stress relaxation process
-Apply pressure to sensors
+
 Add README
-Add random mesh grid
+
 Add maximum displacement (look at the fucking foam at 8N)
 
 Very important!!!
 Check why displacement is 0 when there is contact!!!
 
+Stress needs to be present during stress relaxation
+
+Add max pressure per material (in the material handler)
+
+Add stress sensors vs strain sensors | DONE
++ investigate displacement
+
+Fill the robotic arm
+
+Add surface of the sensors
+
 https://docs.google.com/document/d/1y1DOSzD8cJKVa9my3Vqec7bWuaSYQyegPPBmfde-MQU/edit
 
-Stress needs to be present during stress relaxation
-Add max pressure per material
 
-Add stress sensors vs strain sensors
 """

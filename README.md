@@ -26,13 +26,22 @@ pip install PyQt5 pyvistaqt pyvista sfepy numpy pandas matplotlib scipy vtk
 
 ## How to use
 
+### Mesh activation
+
 ### Recording data
 
 Pressure data from the sensors can be record by clicking the "Record" button in the GUI.
-To end the recording, click the "Stop recording" button. 
+To end the recording, click the **Stop recording** button. 
 The csv file containing the data will be saved in the same directory as the project with the unique name with current date and time.
 
-**CSV File Format**
+
+### Choosing sensor output type
+
+The sensor output type can switch by clicking the **Switch sensor output** button in the GUI.
+Current sensor output type is displayed in the GUI.
+When recording the data the sensor output type will be added to the CSV file name.
+
+### CSV File Format
 
 This application records sensor data and saves them in a CSV file. The format of the CSV file is as follows:
 

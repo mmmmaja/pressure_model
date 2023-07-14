@@ -288,7 +288,7 @@ def get_chosen_time_frames(sensor_readings, readings_time_frame, desired_time_fr
 
 pos_m, rec_m, time_m = read_csv('../recordings/arm_sphere_contact.csv')
 pos_l, rec_l, time_l = read_lukas_recording(
-    "C:/Users/majag/Desktop/arm_data/short/sphere_sensor_press_1_LIN.xlsx"
+    "C:/Users/majag/Desktop/arm_data/short/sphere_sensor_press_2_LIN.xlsx"
 )
 # cropped_rec_m = get_chosen_time_frames(rec_m, time_m, time_l)
 #
@@ -298,20 +298,19 @@ pos_l, rec_l, time_l = read_lukas_recording(
 # analysis.correlation_matrices()
 
 
-reader_maja = ReadingManager(pos_m, rec_m, time_m)
-frame_index_m = reader_maja.get_descriptive_frame()
-reader_maja.plot_time_series(average=True)
-reader_maja.visualize()
-reader_maja.create_image(resolution=2, frame_index=frame_index_m)
+# reader_maja = ReadingManager(pos_m, rec_m, time_m)
+# frame_index_m = reader_maja.get_descriptive_frame()
+# reader_maja.plot_time_series(average=True)
+# reader_maja.visualize()
+# reader_maja.create_image(resolution=2, frame_index=frame_index_m)
 
 
 
 reader_lukas = ReadingManager(pos_l, rec_l, time_l)
 reader_lukas.identify_faulty_sensors()
-reader_lukas.plot_time_series(average=True)
 frame_index_l = reader_lukas.get_descriptive_frame()
 print(frame_index_l)
-# reader_lukas.create_image(resolution=2, frame_index=reader_lukas.get_descriptive_frame())
+reader_lukas.create_image(resolution=2, frame_index=reader_lukas.get_descriptive_frame())
 reader_lukas.visualize(index=frame_index_l)
 
 

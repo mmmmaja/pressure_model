@@ -9,19 +9,28 @@ We can create different sensor configurations for the mesh.
 The sensors are used to measure the pressure at a certain point in the mesh.
 """
 
+"""
+Types of sensor outputs:
+    - Stress
+    - Strain
+"""
+
 
 class SensorParent:
 
     # Minimal distance from the edges of the mesh
     offset = 1.4
 
-    def __init__(self, mesh_boost):
+    def __init__(self, mesh_boost, output_type='stress'):
         """
         Parent class for all the sensor configurations
         :param mesh_boost: The mesh object
+        :param output_type: The type of output of the sensor (stress or strain)
         """
 
         self.mesh_boost = mesh_boost
+        self.output_type = output_type
+
         self.sensor_list = self.create_sensors()
         self.visualization = self.create_visualization()
 
@@ -31,6 +40,15 @@ class SensorParent:
         Create the sensor list depending on the configuration
         :return: list of sensor objects
         """
+
+    def assign_sensor_outputs(self, output_type):
+        """
+        Assign the output type to each sensor in the list
+        :param output_type: The type of output of the sensor (stress or strain)
+        """
+        self.output_type = output_type
+        for sensor in self.sensor_list:
+            sensor.output_type = output_type
 
     def map_vertex_ids(self, coordinates):
         """
@@ -87,7 +105,7 @@ class SensorParent:
 
     def relax(self):
         for sensor in self.sensor_list:
-            sensor.stress = 0
+            sensor.output = 0
 
 
 class SensorGrid(SensorParent):
@@ -286,7 +304,7 @@ class SensorArm(SensorParent):
 
 class Sensor:
 
-    def __init__(self, name, index, mesh):
+    def __init__(self, name, index, mesh, output_type='stress'):
         """
         :param name: Unique name of the sensor
         :param index: Index of the sensor in the mesh
@@ -295,28 +313,41 @@ class Sensor:
         """
         self.name = name
         self.index = index
-        self.stress = 0.0
+        self.output = 0.0
+        self.output_type = output_type
 
         self.initial_position = self.get_position(mesh.current_vtk)
         self.neighbour_cells = mesh.sfepy_mesh.get_neighbouring_cells(index)
 
     def get_position(self, vtk_mesh):
+        """
+        Maps the position of the sensor to the corresponding vertex in the mesh
+        :param vtk_mesh: The mesh object in the VTK format
+        :return: the 3D coordinates of the sensor (vertex from the mesh)
+        """
         return vtk_mesh.points[self.index]
 
-    def get_stress(self):
+    def get_output(self):
         """
         Stress is a measure of the internal forces in a material body.
         It's defined as the force per unit area.
         """
-        return self.stress
+        return self.output
 
-    def set_readings(self, stress_output):
+    def set_reading(self, stress_output, strain_output):
+        if self.output_type == 'stress':
+            self.set_stress_readings(stress_output)
+        elif self.output_type == 'strain':
+            self.set_strain_readings(strain_output)
+
+    def set_stress_readings(self, stress_output):
         """
         In a 3D stress tensor,
         the normal stresses are the diagonal elements, namely σ_xx, σ_yy, and σ_zz.
 
         Take an average of the stress tensor field and then multiply it by the area to get a force reading,
         mimicking the sensor's output.
+        :param stress_output: The stress tensor field computed by the FEM solver from the displacement field
         """
 
         average_reading = 0.0
@@ -324,7 +355,33 @@ class Sensor:
         for i in range(n):
             average_reading += stress_output[self.neighbour_cells[i]][2]
         average_reading /= n
-        self.stress = average_reading
+        self.output = average_reading
+
+    def set_strain_readings(self, strain_output):
+        """
+        Strain is a measure of deformation or change in shape of a material body under
+        the influence of stress (forces).
+        It's the change in size or shape of an object compared to its original size or shape.
+
+        Strain is defined mathematically as the fractional change in length
+        (for a one-dimensional object like a rod or wire),
+        or as the deformation (change in shape) of a solid.
+
+        Strain is related to the displacements of the nodes in the mesh.
+        When a force is applied, the nodes will move,
+        and the amount they move relative to their initial positions represents the strain in the material.
+
+        Take an average of the strain tensor field and then multiply it by the area to get a force reading,
+        mimicking the sensor's output.
+        :param strain_output: The strain tensor field computed by the FEM solver from the displacement field
+        """
+
+        average_reading = 0.0
+        n = len(self.neighbour_cells)
+        for i in range(n):
+            average_reading += strain_output[self.neighbour_cells[i]][2]
+        average_reading /= n
+        self.output = average_reading
 
 
 """

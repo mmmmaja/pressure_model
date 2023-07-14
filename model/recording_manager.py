@@ -31,7 +31,7 @@ class Recording:
         self.timer.start(self.dt)  # period of dt milliseconds
 
     def record(self):
-        self.sensor_data.append([sensor.stress for sensor in self.sensors.sensor_list])
+        self.sensor_data.append([sensor.output for sensor in self.sensors.sensor_list])
 
     def stop(self):
         print("Recording Stopped...")
@@ -51,9 +51,12 @@ class Recording:
 
         if self.file_name is None:
             # Get current date and time
-            file_name = datetime.now().strftime("%Y-%m-%d_%H-%M-%S") + '.csv'
+            file_name = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
         else:
             file_name = self.file_name
+
+        # Add the indication of the sensor output type to the file name
+        file_name += '_' + self.sensors.output_type + '.csv'
 
         print("Saving data to: " + file_name)
 
@@ -75,4 +78,3 @@ class Recording:
             writer.writerow(sensor_positions)
             for i in range(len(self.sensor_data)):
                 writer.writerow(self.sensor_data[i] + [time[i]])
-            # writer.writerows(self.sensor_data)

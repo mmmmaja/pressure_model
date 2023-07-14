@@ -23,6 +23,9 @@ class GUI:
         # List of sensors that record pressure
         self.sensors = sensors
 
+        # Define the sensor output type
+        self.sensor_output_type = 'stress'
+
         # Define the pressure
         self.PRESSURE = 0.001
         # Change in the pressure when on the event
@@ -35,6 +38,7 @@ class GUI:
         self.material_text_actor = None
         self.mode_text_actor = None
         self.force_indicator_actor = None
+        self.sensor_output_text_actor = None
 
         # Define the actions
         self.record_action = None
@@ -55,6 +59,9 @@ class GUI:
         self.add_material_text()
         self.add_mode_text('Interactive')
         self.add_recording_actions()
+        # Add sensor output switch action
+        self.add_sensor_output_switch_action()
+        self.add_sensor_output_text(self.sensor_output_type)
 
         # Add the interactive events to the plotter
         self.add_force_events()
@@ -145,6 +152,17 @@ class GUI:
             text, position='upper_right', font_size=10, color=self.text_color
         )
 
+    def add_sensor_output_text(self, text):
+        # Indicates which mode the user is in (Activation or Interactive)
+        # Remove the text
+        if self.sensor_output_text_actor is not None:
+            self.plotter.remove_actor(self.sensor_output_text_actor)
+        # Add the new text
+        text = f'Sensor output: {text}'
+        self.sensor_output_text_actor = self.plotter.add_text(
+            text, position='upper_left', font_size=9, color=self.text_color
+        )
+
     def add_pressure_indicator(self):
         # Add the information about the pressure that is being applied
         if self.force_indicator_actor is not None:
@@ -182,7 +200,7 @@ class GUI:
         self.plotter.main_menu.addAction(self.stop_record_action)
 
     def start_recording(self):
-        self.recording = Recording(self.sensors, file_name='lukas.csv')
+        self.recording = Recording(self.sensors, file_name=None)
         self.recording.start()
         self.update_recording_actions()
 
@@ -198,3 +216,34 @@ class GUI:
         else:
             self.record_action.setVisible(True)
             self.stop_record_action.setVisible(False)
+
+    def add_sensor_output_switch_action(self):
+
+        # Create the QAction object
+        self.sensor_output_action = QAction('Switch sensor output', self.plotter.main_menu)
+
+        # Connect the action to the switch sensor output method
+        self.sensor_output_action.triggered.connect(self.switch_sensor_output)
+
+        # Add the action to the plotter main menu
+        self.plotter.main_menu.addAction(self.sensor_output_action)
+
+    def switch_sensor_output(self):
+        # Switch the sensor output type when this method is called
+        if self.sensor_output_type == 'stress':
+            self.sensor_output_type = 'strain'
+        else:
+            self.sensor_output_type = 'stress'
+
+        self.add_sensor_output_text(self.sensor_output_type)
+
+        # Here you can add the code that will trigger the event when the sensor output type changes
+        # For example:
+        self.trigger_event(self.sensor_output_type)
+
+        # Update the QAction text to indicate current sensor output type
+        self.sensor_output_action.setText(f'Sensor output: {self.sensor_output_type}')
+
+    def trigger_event(self, sensor_output_type):
+        self.sensors.assign_sensor_outputs(sensor_output_type)
+
