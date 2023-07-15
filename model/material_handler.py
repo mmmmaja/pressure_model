@@ -1,6 +1,4 @@
-import math
 import random
-
 from sfepy.mechanics.matcoefs import stiffness_from_youngpoisson, lame_from_youngpoisson
 
 _colors = [

@@ -182,71 +182,60 @@ class ReadingManager:
         print(f"Min pressure: {min_pressure}")
         print(f"Max pressure: {max_pressure}")
 
-    def plot_time_series(self, average=False):
+    def plot_time_series(self, title=None, y_label='Sensor output'):
         sns.set_style('darkgrid')
         sns.set(rc={'figure.figsize': (10, 6)})
 
         # Create a dataframe with the sensor readings
         sensor_reading_df = pd.DataFrame()
         sensor_reading_df['Time'] = self.time
-        for i in range(self.sensor_reading.shape[1]):
-            sensor_reading_df[f'Sensor {i}'] = self.sensor_reading[:, i]
 
         # Add the column for average sensor reading for the frame
-        sensor_reading_df['Average'] = sensor_reading_df.mean(axis=1)
-
-        # Add the colum for the variance of the sensor readings for the frame
-        sensor_reading_df['Variance'] = sensor_reading_df.var(axis=1)
+        sensor_reading_df['Average'] = np.mean(self.sensor_reading, axis=1)
 
         # Get the average sensor reading for each sensor
-        sensor_means = sensor_reading_df.mean(axis=0)
+        sensor_means = np.mean(self.sensor_reading, axis=0)
+        print(sensor_means)
         # Get the index of the sensor with the highest average output
         max_sensor = np.argmax(sensor_means)
 
-        # Add the column for the sensor with the highest output
-        sensor_reading_df['Max Sensor'] = self.sensor_reading[:, max_sensor]
+        # Add the column for the sensor with the highest average output
+        sensor_reading_df['Max'] = self.sensor_reading[:, max_sensor]
 
-        if average:
-            palette = sns.color_palette("mako_r", 4)
+        # Add the column for standard deviation of the sensor readings for the frame
+        sensor_reading_df['Std'] = np.std(self.sensor_reading, axis=1)
 
-            ax = sns.lineplot(
-                data=sensor_reading_df,
-                x='Time', y='Average',
-                markers=True, color=palette[0],
-                dashes=False, label='Average sensor output', linewidth=2.0
-            )
-            # Add the variance
-            ax.fill_between(
-                sensor_reading_df['Time'], sensor_reading_df['Average'] - sensor_reading_df['Variance'],
-                sensor_reading_df['Average'] + sensor_reading_df['Variance'],
-                alpha=0.2, color=palette[1], label='Variance')
+        print(sensor_reading_df)
 
-            # Add the max sensor output
-            ax.plot(
-                sensor_reading_df['Time'],
-                sensor_reading_df['Max Sensor'],
-                color=palette[2], linestyle='--',
-                label='Max sensor output',
-                linewidth=1.0
-            )
+        palette = sns.color_palette("mako_r", 3)
 
-            # Add legend
-            plt.legend()
+        ax = sns.lineplot(
+            data=sensor_reading_df,
+            x='Time', y='Average',
+            markers=True, color=palette[0],
+            dashes=False, label='Average sensor output', linewidth=2.0
+        )
+        # Add the standard deviation
+        ax.fill_between(
+            sensor_reading_df['Time'],
+            sensor_reading_df['Average'] - sensor_reading_df['Std'],
+            sensor_reading_df['Average'] + sensor_reading_df['Std'],
+            alpha=0.2, color=palette[1], label='Standard deviation'
+        )
 
-        else:
+        ax = sns.lineplot(
+            data=sensor_reading_df,
+            x='Time', y='Max',
+            markers=True, color=palette[2],
+            dashes=False, label='Sensor with maximum output', linewidth=1.5
+        )
 
-            ax = sns.lineplot(data=self.sensor_reading,
-                              palette='plasma',
-                              dashes=False, legend=False, linewidth=1.5,
-                              hue='Time')
+        if title is not None:
+            plt.title(title)
 
-            # Add the indicator for the maximum output
-            max_frame = self.get_descriptive_frame()
-            ax.axvline(x=max_frame, color='grey', linestyle='--', label='Maximum output')
-
-        plt.ylabel('Force [N]')
-
-        plt.xlabel('Seconds')
+        plt.ylabel(y_label)
+        plt.xlabel('Time [sec]')
+        plt.legend()
         plt.show()
 
 
@@ -298,20 +287,20 @@ pos_l, rec_l, time_l = read_lukas_recording(
 # analysis.correlation_matrices()
 
 
-# reader_maja = ReadingManager(pos_m, rec_m, time_m)
-# frame_index_m = reader_maja.get_descriptive_frame()
-# reader_maja.plot_time_series(average=True)
+reader_maja = ReadingManager(pos_m, rec_m, time_m)
+frame_index_m = reader_maja.get_descriptive_frame()
+reader_maja.plot_time_series(title="Model recording")
 # reader_maja.visualize()
 # reader_maja.create_image(resolution=2, frame_index=frame_index_m)
 
 
-
 reader_lukas = ReadingManager(pos_l, rec_l, time_l)
 reader_lukas.identify_faulty_sensors()
-frame_index_l = reader_lukas.get_descriptive_frame()
-print(frame_index_l)
-reader_lukas.create_image(resolution=2, frame_index=reader_lukas.get_descriptive_frame())
-reader_lukas.visualize(index=frame_index_l)
+# frame_index_l = reader_lukas.get_descriptive_frame()
+reader_lukas.plot_time_series(title="Robotic arm device recording")
+# print(frame_index_l)
+# reader_lukas.create_image(resolution=2, frame_index=reader_lukas.get_descriptive_frame())
+# reader_lukas.visualize(index=frame_index_l)
 
 
 # distribution_analysis(reader_maja.sensor_reading)

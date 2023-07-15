@@ -26,6 +26,17 @@ pip install PyQt5 pyvistaqt pyvista sfepy numpy pandas matplotlib scipy vtk
 
 ## How to use
 
+### Simulation Setup
+    
+You can choose the objects that will be used in the simulation by modifying the **setup.py** file in the model folder.
+This includes the following:
+- Stimuli
+- Mesh
+- Sensors
+- Material properties
+
+(All of these are explained in more detail in the **setup.py** file)
+
 ### Mesh activation
 
 ### Recording data
@@ -62,8 +73,4 @@ Note: Each sensor output value in the Sensor columns corresponds to the sensor a
 
 
 
-### Meshes
 
-### Stimuli
-
-### Sensors

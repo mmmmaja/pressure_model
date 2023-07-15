@@ -73,7 +73,6 @@ class ActivationClass(vtk.vtkInteractorStyleTrackballCamera):
         :param obj: object that triggered the event
         :param event: event that was triggered
         """
-        print("Mouse pressed")
         # Get the mouse coordinates and pick the cell
         x, y = self.GetInteractor().GetEventPosition()
         self.pick_cell(x, y)
