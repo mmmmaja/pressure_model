@@ -1,3 +1,5 @@
+import datetime
+
 import pyvista
 import vtk
 
@@ -35,6 +37,14 @@ class MeshBoost:
 
         # The mesh object in Sfepy format for solvers
         self.sfepy_mesh = self.create_sfepy_mesh()
+
+        # An array to store the last activation time for each point (Filled with datetime now values at the beginning)
+        self.last_activation_time = np.array([
+            datetime.datetime.now() for _ in range(self.current_vtk.points.shape[0])
+        ])
+
+        # An array to store the maximum displacement for each point
+        self.max_displacement = np.zeros((self.current_vtk.points.shape[0], 3))
 
     @abstractmethod
     def create_mesh(self):
@@ -77,7 +87,7 @@ class MeshBoost:
         # Create the copy of the old mesh
         mesh_copy = self.current_vtk.copy()
         # Update the vtk version of the mesh
-        self.current_vtk.points = self.current_vtk.points.copy() + u
+        self.current_vtk.points = u
 
         # Create the sfepy version of the mesh for the solver
         sfepy_mesh = self.create_sfepy_mesh()
@@ -127,7 +137,7 @@ class MeshBoost:
 class GridMesh(MeshBoost):
 
     # Thickness of the mesh
-    THICKNESS = 2.73
+    THICKNESS = 2.9
 
     def __init__(self, width, height, z_function=flat, layers=2):
         """

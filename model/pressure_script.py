@@ -1,3 +1,4 @@
+import time
 from abc import abstractmethod
 import numpy as np
 
@@ -173,20 +174,22 @@ def apply_volume_pressure(gui, relaxation=True):
     apply_pressure(gui, force_handler, relaxation)
 
 
-def apply_stimuli_pressure(gui, stimuli, picker, cell_id, relaxation=True):
+def apply_stimuli_pressure(gui, picker, cell_id, relaxation=True):
     # Recompute the position of the stimuli based on the cell that was picked
-    if stimuli.recompute_position(picker, cell_id):
+    if gui.stimuli.recompute_position(picker, cell_id):
         # This object will handle assigning the pressure to the vertices
-        force_handler = StimuliPressure(stimuli, gui.PRESSURE)
+        force_handler = StimuliPressure(gui.stimuli, gui.PRESSURE)
         # Apply the pressure to the mesh, start the FENICS computation
-        apply_pressure(gui, force_handler, relaxation)
+        return apply_pressure(gui, force_handler, relaxation)
 
 
-def apply_cell_specific_pressure(gui, cell, relaxation=True):
-    if not cell:
-        return
-    force_handler = CellSpecificPressure(cell.points, gui.PRESSURE)
-    apply_pressure(gui, force_handler, relaxation)
+# def update_activation_matrix(gui, u):
+#     current_time = time.time()
+#     for i in range(gui.mesh_boost.current_vtk.points.shape[0]):
+#         # Get the pressure that should be applied to the vertex
+#         displacement = u[i]
+#         if np.linalg.norm(displacement) < 1e-12:
+#             gui.mesh_boost.last_activation_time[i] = current_time
 
 
 def apply_pressure(gui, force_handler, relaxation):
@@ -202,22 +205,15 @@ def apply_pressure(gui, force_handler, relaxation):
 
     # Calculate the displacement
     u = fenics.apply_pressure(force_handler)
-    if u is None:
-        return
 
-    # UPDATE plot and meshes
-    gui.mesh_boost.update_mesh(u)
-    gui.sensors.update_visualization()
+    return u
 
-    gui.draw_mesh()
-    gui.draw_sensors()
-    gui.plotter.update()
-
-    if relaxation:
-        # Start the stress relaxation process
-        # Stop existing relaxation process
-        if stress_relaxation_ref is not None:
-            stress_relaxation_ref.stop()
-
-        stress_relaxation_ref = StressRelaxation(gui)
-        stress_relaxation_ref.initiate(wait=True)
+    # update_activation_matrix(gui, u)
+    #
+    # # UPDATE plot and meshes
+    # gui.mesh_boost.update_mesh(u)
+    # gui.sensors.update_visualization()
+    #
+    # gui.draw_mesh()
+    # gui.draw_sensors()
+    # gui.plotter.update()

@@ -1,6 +1,8 @@
 import numpy as np
 import pyvistaqt as pvqt  # For updating plots real time
 from PyQt5.QtWidgets import QAction  # For the custom button
+
+from model.pressure_script import apply_volume_pressure
 from model.recording_manager import Recording
 
 
@@ -88,18 +90,20 @@ class GUI:
         visual_properties = self.mesh_material.visual_properties
         self.mesh_actor = self.plotter.add_mesh(
             self.mesh_boost.current_vtk,
-            show_edges=False,
+            show_edges=True,
             smooth_shading=True,
             show_scalar_bar=False,
-            edge_color=visual_properties['edge_color'],
+            edge_color='white',
             color=visual_properties['color'],
             specular=visual_properties['specular'],
             metallic=visual_properties['metallic'],
             roughness=visual_properties['roughness'],
-            name='initial_mesh'
+            name='initial_mesh',
+            # opacity=0.99,
         )
 
     def draw_stimuli(self):
+        return
         # Draw the stimuli object in the plotter
         stimuli = self.stimuli.create_visualization()
 
@@ -127,6 +131,7 @@ class GUI:
         )
 
     def draw_sensors(self):
+        return
         # Draw the sensor points in the plotter
         self.sensor_actor = self.plotter.add_mesh(
             self.sensors.visualization,

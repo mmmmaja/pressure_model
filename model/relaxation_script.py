@@ -1,5 +1,5 @@
+import time
 import numpy as np
-from PyQt5.QtCore import QTimer
 
 
 class StressRelaxation:
@@ -15,35 +15,7 @@ class StressRelaxation:
     FORCE_LIMIT = 1e-2
 
     def __init__(self, gui):
-        # Time step: how many milliseconds between each update
-        self.dt = 20  # ms
-        # Current time of the stress relaxation simulation
-        self.t = 0
-
         self.gui = gui
-
-        self.relaxation_timer = None
-        self.wait_timer = None
-
-    def initiate(self, wait=False):
-
-        # Timer for relaxation process, but don't start yet
-        self.relaxation_timer = QTimer()
-        self.relaxation_timer.timeout.connect(self.thread_iteration)
-
-        if wait:
-            # The time in milliseconds to wait before starting the relaxation process
-            wait_time = 1000
-            # Timer for waiting before starting the relaxation process
-            self.wait_timer = QTimer()
-            self.wait_timer.timeout.connect(self.start_relaxation)
-            self.wait_timer.setSingleShot(True)
-            self.wait_timer.start(wait_time)
-        else:
-            self.start_relaxation()
-
-    def start_relaxation(self):
-        self.relaxation_timer.start(self.dt)  # period of dt milliseconds
 
     def exponential_decay(self, t):
         """
@@ -55,56 +27,36 @@ class StressRelaxation:
         """
         return np.exp(-t / self.gui.mesh_material.time_constant)
 
-    def get_relaxation_displacement(self, u, t):
+    def get_relaxation_displacement(self, u):
         """
-        Stress relaxation behavior is described by the equation:
-        u(t) = u0 * exp(-t/τ)
-            u0 is the maximum displacement,
-            t is the current time of the simulation,
-            τ is the relaxation time of the material.
+        Calculate the relaxation displacement of the mesh
         :return: the current displacement dependant of the time t of the simulation
         """
-        return u * self.exponential_decay(t)
+        relaxation_rate = 0.1
+        # Iterate through all the points in the mesh
+        relaxation = np.zeros_like(u)
+        for i in range(len(u)):
 
-    def thread_iteration(self):
-        self.relax_iteration(self.t)
+            # calculate the current displacement from the initial position
+            current_displacement = self.gui.mesh_boost.current_vtk.points[i] - self.gui.mesh_boost.initial_vtk.points[i]
+            # calculate the relaxation displacement
+            relaxation_displacement = relaxation_rate * current_displacement
+            # print(relaxation_displacement)
+            relaxation[i] = -relaxation_displacement
 
-    def relax_iteration(self, t):
+        return relaxation
+
+    def relax_iteration(self):
         """
-        :param t: current time of the simulation
 
         This function is called every dt milliseconds
         Updates the displacement of the mesh and the GUI
         """
 
-        # Get the displacement of the mesh on this iteration
+        # Get the overall displacement of the mesh on this iteration
         u = self.gui.mesh_boost.current_vtk.points - self.gui.mesh_boost.initial_vtk.points
 
-        # calculate the displacement
-        relaxation = self.get_relaxation_displacement(u, t)
+        # calculate the displacement from initial mesh to the current mesh
+        relaxation = self.get_relaxation_displacement(u)
 
-        # OVERRIDE the GUI
-        self.gui.mesh_boost.override_mesh(relaxation)
-        self.gui.sensors.update_visualization()
-
-        self.gui.draw_mesh()
-        self.gui.draw_sensors()
-        self.gui.plotter.update()
-
-        # advance the time variable
-        self.t += self.dt
-
-        # Disable the timer when the magnitude of u is close to 0
-        if np.linalg.norm(u) < self.FORCE_LIMIT:
-            self.relaxation_timer.stop()
-
-    def stop(self):
-        """
-        Stop the relaxation process and delete the timers
-        Otherwise the timers will keep running in the background and display will keep freezing
-        """
-        if self.relaxation_timer is not None:
-            if self.relaxation_timer.isActive():
-                self.relaxation_timer.stop()
-                self.relaxation_timer.deleteLater()
-                self.relaxation_timer = None
+        return relaxation
