@@ -2,6 +2,7 @@ import csv
 from abc import abstractmethod
 import numpy as np
 import pyvista
+import sys
 
 """
 This file contains the classes for the sensor arrays. 
@@ -104,8 +105,9 @@ class SensorParent:
         return True
 
     def relax(self):
+        # FIXME
         for sensor in self.sensor_list:
-            sensor.output = 0
+            sensor.output = np.array([0.0, 0.0, 0.0])
 
 
 class SensorGrid(SensorParent):
@@ -313,7 +315,7 @@ class Sensor:
         """
         self.name = name
         self.index = index
-        self.output = 0.0
+        self.output = np.array([0.0, 0.0, 0.0])
         self.output_type = output_type
 
         self.initial_position = self.get_position(mesh.current_vtk)
@@ -350,10 +352,13 @@ class Sensor:
         :param stress_output: The stress tensor field computed by the FEM solver from the displacement field
         """
 
-        average_reading = 0.0
+        average_reading = np.array([0.0, 0.0, 0.0])
         n = len(self.neighbour_cells)
         for i in range(n):
-            average_reading += stress_output[self.neighbour_cells[i]][2]
+            # Matrix has shape of (6, ). First 3 elements are the normal stresses
+            stress_tensor = stress_output[self.neighbour_cells[i]]
+            normal_stresses = stress_tensor[:3]
+            average_reading += normal_stresses
         average_reading /= n
         self.output = average_reading
 
@@ -376,10 +381,13 @@ class Sensor:
         :param strain_output: The strain tensor field computed by the FEM solver from the displacement field
         """
 
-        average_reading = 0.0
+        average_reading = np.array([0.0, 0.0, 0.0])
         n = len(self.neighbour_cells)
         for i in range(n):
-            average_reading += strain_output[self.neighbour_cells[i]][2]
+            # Matrix has shape of (6, ). First 3 elements are the normal stresses
+            strain_tensor = strain_output[self.neighbour_cells[i]]
+            normal_strain = strain_tensor[:3]
+            average_reading += normal_strain
         average_reading /= n
         self.output = average_reading
 

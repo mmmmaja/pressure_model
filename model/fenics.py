@@ -217,8 +217,13 @@ class FENICS:
         [σ_xx, σ_xy, σ_xz]
         [σ_yx, σ_yy, σ_yz]
         [σ_zx, σ_zy, σ_zz]
+        For such symmetric matrices, there are only 6 independent components, not 9, 
+        because the off-diagonal components are equal
+        σ_xy = σ_yx
+        σ_xz = σ_zx
+        σ_yz = σ_zy
+        
         I am just interested in diagonal elements of the stress tensor, which are the normal stresses.
-        Here, just taking the z component of the stress tensor.
         """
         # Calculate the stress tensor and flatten it
         stress_tensor_np = np.squeeze(np.array(stress.data))

@@ -7,7 +7,6 @@ from model.pressure_script import StimuliPressure
 
 
 class Recording:
-
     FOLDER_PATH = '../recordings'
 
     def __init__(self, sensors, dt=100, file_name=None):
@@ -31,7 +30,10 @@ class Recording:
         self.timer.start(self.dt)  # period of dt milliseconds
 
     def record(self):
-        self.sensor_data.append([sensor.output for sensor in self.sensors.sensor_list])
+        self.sensor_data.append([
+            str(sensor.output[0]) + ' ' + str(sensor.output[1]) + ' ' + str(sensor.output[2])
+            for sensor in self.sensors.sensor_list
+        ])
 
     def stop(self):
         print("Recording Stopped...")
@@ -45,7 +47,7 @@ class Recording:
 
         Form of the csv file:
             First line: sensor positions  -> x y z | x y z | x y z | ...
-            Rest of the file: sensor data -> stress | stress | stress | ...
+            Rest of the file: sensor data -> output (x y z) | output (x y z) | output (x y z) | ...
             LAST column: time
         """
 
@@ -57,8 +59,6 @@ class Recording:
 
         # Add the indication of the sensor output type to the file name
         file_name += '_' + self.sensors.output_type + '.csv'
-
-        print("Saving data to: " + file_name)
 
         time = [i * self.dt for i in range(len(self.sensor_data))]
 
@@ -75,6 +75,11 @@ class Recording:
         path = self.FOLDER_PATH + '/' + file_name
         with open(path, 'w', newline='') as file:
             writer = csv.writer(file)
+            # In the first line, write the sensor positions
             writer.writerow(sensor_positions)
+
             for i in range(len(self.sensor_data)):
-                writer.writerow(self.sensor_data[i] + [time[i]])
+                # Get all the data from the sensors in the i-th frame and write it to the file as strings
+                writer.writerow(self.sensor_data[i] + [str(time[i] / 1000)])
+
+            print("Saving data to: " + file_name)

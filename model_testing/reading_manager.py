@@ -21,7 +21,23 @@ def read_csv(path):
     index = 0
     sensor_positions, sensor_readings, time = [], [], []
     with open(path, 'r', newline='') as file:
+
+        # Number of columns in the file
+        num_columns = len(file.readline().split(','))
+        print('Number of sensors: ', num_columns)
+
+        # Number of rows in the file
+        num_rows = len(file.readlines())
+        print('Number of frames: ', num_rows)
+
+        # Go back to the beginning of the file
+        file.seek(0)
+
         for row in file.readlines():
+
+            # List of sensor readings in the current frame
+            sensor_readings_frame = []
+
             # First row contains position of the sensors
             if index == 0:
                 sensor_positions = row.split(',')
@@ -29,17 +45,43 @@ def read_csv(path):
                 for i in range(len(sensor_positions)):
                     sensor_positions[i] = sensor_positions[i].split(' ')
                     sensor_positions[i] = [float(x) for x in sensor_positions[i]]
+
             # The rest of the rows contain the sensor readings
             else:
                 # Last column is the time
                 str_row = row.split(',')
-                # Convert from string to float
-                float_row = [float(x) for x in str_row]
-                # Convert time to seconds
-                time.append(float_row[-1] / 1000)
-                sensor_readings.append(float_row[:-1])
+
+                # Read time in seconds
+                time.append(float(str_row[-1]))
+
+                # Read sensor readings
+                for reading in str_row[:-1]:
+                    # Consists of (x, y, z) vector
+                    float_row = reading.split(' ')
+                    # Convert to numpy array
+                    sensor_readings_frame.append(
+                       [float(x) for x in float_row]
+                    )
+                # Add the sensor readings to the list from all the frames
+                sensor_readings.append(sensor_readings_frame)
+
             index += 1
-    return np.array(sensor_positions), np.array(sensor_readings) * (-1), np.array(time)
+
+    sensor_readings = np.array(sensor_readings)
+    time = np.array(time)
+    sensor_positions = np.array(sensor_positions)
+    print('Done reading csv file, sensor readings shape: ', sensor_readings.shape)
+
+    return sensor_positions, sensor_readings, time
+
+
+def z_sensor_readings(sensor_readings):
+    """
+    Get the z component of the sensor readings
+    :param sensor_readings: sensor readings
+    :return: z component of the sensor readings
+    """
+    return sensor_readings[:, :, 2]
 
 
 class ReadingManager:
@@ -53,9 +95,6 @@ class ReadingManager:
         self.time = time
 
         self.sensor_positions_mapping = mapping(self.sensor_positions)
-
-        # (num_measurements, num_sensors)
-        print('shape of readings: ', self.sensor_reading.shape)
 
     def set_mapping(self, mapping):
         """
@@ -195,7 +234,6 @@ class ReadingManager:
 
         # Get the average sensor reading for each sensor
         sensor_means = np.mean(self.sensor_reading, axis=0)
-        print(sensor_means)
         # Get the index of the sensor with the highest average output
         max_sensor = np.argmax(sensor_means)
 
@@ -204,8 +242,6 @@ class ReadingManager:
 
         # Add the column for standard deviation of the sensor readings for the frame
         sensor_reading_df['Std'] = np.std(self.sensor_reading, axis=1)
-
-        print(sensor_reading_df)
 
         palette = sns.color_palette("mako_r", 3)
 
@@ -275,7 +311,9 @@ def get_chosen_time_frames(sensor_readings, readings_time_frame, desired_time_fr
     return cropped_recording
 
 
-pos_m, rec_m, time_m = read_csv('../recordings/arm_sphere_contact.csv')
+pos_m, rec_m, time_m = read_csv('../recordings/2023-07-21_16-17-20_stress.csv')
+rec_m = z_sensor_readings(rec_m)
+
 pos_l, rec_l, time_l = read_lukas_recording(
     "C:/Users/majag/Desktop/arm_data/short/sphere_sensor_press_2_LIN.xlsx"
 )
@@ -290,8 +328,8 @@ pos_l, rec_l, time_l = read_lukas_recording(
 reader_maja = ReadingManager(pos_m, rec_m, time_m)
 frame_index_m = reader_maja.get_descriptive_frame()
 reader_maja.plot_time_series(title="Model recording")
-# reader_maja.visualize()
-# reader_maja.create_image(resolution=2, frame_index=frame_index_m)
+reader_maja.visualize()
+reader_maja.create_image(resolution=2, frame_index=frame_index_m)
 
 
 reader_lukas = ReadingManager(pos_l, rec_l, time_l)

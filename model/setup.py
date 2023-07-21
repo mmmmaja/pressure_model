@@ -24,7 +24,8 @@ Types of meshes:
     ArmMesh()
     
 """
-_mesh_boost = GridMesh(30, 30, z_function=wave, layers=3)
+_mesh_boost = ArmMesh()
+# _mesh_boost = GridMesh(30, 30, z_function=wave, layers=3)
 
 
 if _mesh_boost is ArmMesh:

@@ -96,7 +96,7 @@ class Rank_Material:
 
 silicon = Rank_Material(
     name='Silicon',
-    young_modulus=130.0, poisson_ratio=0.265,
+    young_modulus=150.0, poisson_ratio=0.29,
     time_constant=1.0,
     visual_properties={
         'color': silicon_color,
@@ -109,7 +109,7 @@ silicon = Rank_Material(
 
 rubber = Rank_Material(
     name='Rubber',
-    young_modulus=0.05, poisson_ratio=0.19,
+    young_modulus=0.05, poisson_ratio=0.499,
     time_constant=100,
     visual_properties={
         'color': rubber_color,
@@ -122,7 +122,7 @@ rubber = Rank_Material(
 
 steel = Rank_Material(
     name='Steel',
-    young_modulus=190.0, poisson_ratio=0.28,
+    young_modulus=190.0, poisson_ratio=0.29,
     time_constant=1.0,
     visual_properties={
         'color': steel_color,
@@ -135,7 +135,7 @@ steel = Rank_Material(
 
 polyurethane_foam = Rank_Material(
     name='Polyurethane foam',
-    young_modulus=0.003, poisson_ratio=0.3,
+    young_modulus=0.1, poisson_ratio=0.25,
     time_constant=1000.0,
     visual_properties={
         'color': foam_color,
