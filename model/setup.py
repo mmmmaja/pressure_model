@@ -9,7 +9,7 @@ Choose the stimuli from the list of stimuli and specify its size
     Cylinder(radius, height)
     Cube(width, length, height)
 """
-_stimuli = Sphere(radius=1.6)
+_stimuli = Cylinder(radius=3.6, height=0.5)
 
 """
 Choose the mesh from the list of meshes and specify its features
@@ -24,8 +24,8 @@ Types of meshes:
     ArmMesh()
     
 """
-_mesh_boost = ArmMesh()
-# _mesh_boost = GridMesh(30, 30, z_function=wave, layers=3)
+# _mesh_boost = ArmMesh()
+_mesh_boost = GridMesh(30, 30, z_function=flat, layers=3)
 
 
 if _mesh_boost is ArmMesh:

@@ -127,6 +127,7 @@ class GUI:
         )
 
     def draw_sensors(self):
+        return
         # Draw the sensor points in the plotter
         self.sensor_actor = self.plotter.add_mesh(
             self.sensors.visualization,

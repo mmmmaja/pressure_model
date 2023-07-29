@@ -311,7 +311,7 @@ def get_chosen_time_frames(sensor_readings, readings_time_frame, desired_time_fr
     return cropped_recording
 
 
-pos_m, rec_m, time_m = read_csv('../recordings/2023-07-21_16-17-20_stress.csv')
+pos_m, rec_m, time_m = read_csv('../recordings/2023-07-21_16-18-16_strain.csv')
 rec_m = z_sensor_readings(rec_m)
 
 pos_l, rec_l, time_l = read_lukas_recording(

@@ -1,3 +1,4 @@
+import vtk
 from PyQt5.QtWidgets import QApplication
 from model.GUI_handler import GUI
 from model.pressure_script import *
