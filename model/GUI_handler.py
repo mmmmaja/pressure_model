@@ -1,7 +1,7 @@
 import numpy as np
 import pyvistaqt as pvqt  # For updating plots real time
 from PyQt5.QtWidgets import QAction  # For the custom button
-from model.recording_manager import Recording
+from recording_manager import Recording
 
 
 """

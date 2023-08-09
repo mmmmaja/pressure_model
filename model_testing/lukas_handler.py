@@ -1,8 +1,9 @@
 # node (sensor) coordinates ventral (plus pressure dummy data)
+import os
+
 import numpy as np
 import openpyxl
 from matplotlib import pyplot as plt
-
 
 nds_frontX = [0.000, 25.981, 51.962, 77.943, 12.990, 38.971, 64.952, 90.933, 0.000, 25.981, 51.962, 77.943, 12.990,
               38.971, 64.952, 90.933, 0.000, 25.981, 51.962, 77.943, 12.990, 38.971, 64.952, 90.933, 0.000, 25.981,
@@ -67,7 +68,6 @@ def read_lukas_recording(path):
 
     return sensor_positions, sensor_reading, time
 
-
 def read_time(sheet):
     """
     :return: time data from Excel file
@@ -122,11 +122,11 @@ def read_pressure_back_top(sheet, path):
     # Read pressure values for the top back array
     row_count = 0
     for row in sheet.iter_rows(
-        min_row=49 + 3,
-        min_col=1,
-        max_row=min(num_sensors, 70) + 3,
-        max_col=num_measurements,
-        values_only=True
+            min_row=49 + 3,
+            min_col=1,
+            max_row=min(num_sensors, 70) + 3,
+            max_col=num_measurements,
+            values_only=True
     ):
         column_count = 0
         for value in row:

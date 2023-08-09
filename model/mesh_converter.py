@@ -1,13 +1,13 @@
 import pyvista
 import vtk
 
-from model.fenics import SfepyMesh
+from fenics import SfepyMesh
 from abc import abstractmethod
 import numpy as np
 import meshio
 import pyvista as pv
 
-from model.mesh_helper import *
+from mesh_helper import *
 
 
 def convert_to_vtk(path):
@@ -25,7 +25,7 @@ class MeshBoost:
 
     def __init__(self):
         # Path to the .mesh file
-        self.path = '../meshes/mesh.mesh'
+        self.path = 'C:/Users/mjgoj/Desktop/pressure_model/meshes/mesh.mesh'
 
         # The initial mesh object in VTK format
         self.initial_vtk, self.top_region_ids, self.bottom_region_ids = self.create_mesh()
@@ -211,7 +211,7 @@ class ArmMesh(MeshBoost):
     # Make sure that thickness is not too big ( otherwise the mesh will crash :( )
     THICKNESS = 1.2
 
-    OBJ_PATH = '../meshes/model_kfadrat.obj'
+    OBJ_PATH = 'C:/Users/mjgoj/Desktop/pressure_model/meshes/model_kfadrat.obj'
 
     def __init__(self):
         super().__init__()

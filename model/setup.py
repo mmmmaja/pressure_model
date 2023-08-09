@@ -1,7 +1,7 @@
-from model.stimulis import *
-from model._sensors import *
-from model.material_handler import *
-from model.mesh_converter import *
+from stimulis import *
+from _sensors import *
+from material_handler import *
+from mesh_converter import *
 
 """
 Choose the stimuli from the list of stimuli and specify its size

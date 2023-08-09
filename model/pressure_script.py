@@ -1,8 +1,8 @@
 from abc import abstractmethod
 import numpy as np
 
-from model.fenics import FENICS
-from model.relaxation_script import StressRelaxation
+from fenics import FENICS
+from relaxation_script import StressRelaxation
 
 """
 Pressure: 

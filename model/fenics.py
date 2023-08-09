@@ -7,7 +7,6 @@ from sfepy.terms import Term
 from sfepy.discrete.conditions import Conditions, EssentialBC
 from sfepy.solvers.ls import ScipyDirect, ScipyIterative
 from sfepy.solvers.nls import Newton
-# from AI.model.mesh_converter import *
 
 
 """
@@ -247,7 +246,7 @@ def transform_mesh(vtk_mesh):
     :param vtk_mesh: The vtk mesh instance
     :return: The sfepy mesh instance
     """
-    path = '../meshes/current_mesh.vtk'
+    path = 'C:/Users/mjgoj/Desktop/pressure_model/meshes/current_mesh.vtk'
     # Save the mesh to a file
     vtk_mesh.save(path)
     # Load the mesh as a sfepy mesh

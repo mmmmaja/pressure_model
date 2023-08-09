@@ -1,11 +1,11 @@
 import vtk
 from PyQt5.QtWidgets import QApplication
-from model.GUI_handler import GUI
-from model.pressure_script import *
+from GUI_handler import GUI
+from pressure_script import *
 import io
 import sys
-from model._activation import ActivationClass
-from model.setup import _stimuli, _sensors, _mesh_boost, _material
+from _activation import ActivationClass
+from setup import _stimuli, _sensors, _mesh_boost, _material
 
 # Set to True to enable the terminal output,
 # otherwise the output will be redirected to the log file (maybe it is faster this way)
