@@ -4,6 +4,8 @@ This project is a pressure simulation model that makes use of Finite Element Ana
 interaction between different stimuli and a different bodies, represented by a 3D mesh. 
 Pressure data in the model is recorded by the sensors in the mesh.
 
+Model is implemented in the folder **model**. Additional model testing files are located in the folder **model_testing**.
+
 ## Installation and Setup
 
 To run this project, you will need the following libraries:
@@ -37,13 +39,19 @@ This includes the following:
 
 (All of these are explained in more detail in the **setup.py** file)
 
-### Mesh activation
+### Simulation modes
+
+There are two simulation modes available in this project:
+- **Interactive Mode** - In this mode user can rotate and inspect the object within the simulation space.
+- **Activation Mode** - This mode enables user to apply the force onto the mesh with selected stimuli.
+
+Modes are changes by pressing the control key.
 
 ### Recording data
 
 Pressure data from the sensors can be record by clicking the "Record" button in the GUI.
 To end the recording, click the **Stop recording** button. 
-The csv file containing the data will be saved in the same directory as the project with the unique name with current date and time.
+The csv file containing the data will be saved in the same directory as the project in the folder recordings with the unique name with current date and time.
 
 
 ### Choosing sensor output type

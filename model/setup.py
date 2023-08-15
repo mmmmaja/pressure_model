@@ -4,6 +4,10 @@ from material_handler import *
 from mesh_converter import *
 
 """
+In this file you can specify the features of the model
+"""
+
+"""
 Choose the stimuli from the list of stimuli and specify its size
     Sphere(radius)
     Cylinder(radius, height)
@@ -14,13 +18,15 @@ _stimuli = Cylinder(radius=3.6, height=0.5)
 """
 Choose the mesh from the list of meshes and specify its features
 Types of meshes:
-
+    
+    (Mesh defined by the user)
     GridMesh(width, length, z_function, layers)
         width: width of the mesh
         length: length of the mesh
         z_function: function that returns the height of the mesh at a given point (look at mesh_helper.py)
         layers: number of layers of the mesh
-        
+    
+    (3D model of the robotic arm) 
     ArmMesh()
     
 """
@@ -45,7 +51,7 @@ else:
             file_name: name of the file with the sensor patches
             
     """
-    # Specify this
+    # Specify params
     _sensors = SensorGrid(10, 10, _mesh_boost)
 
 

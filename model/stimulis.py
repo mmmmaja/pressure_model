@@ -2,6 +2,14 @@ from abc import abstractmethod
 import pyvista as pv
 import numpy as np
 
+"""
+This module contains the Stimuli class and its subclasses.
+We have following stimuli geometries:
+    - Sphere
+    - Cylinder
+    - Cuboid
+"""
+
 
 class Stimuli:
 

@@ -6,6 +6,11 @@ from scipy.spatial import Delaunay
 from model_testing.surface_flattening import plot_mesh_2D
 
 
+"""
+This file contains the functions that are used to compute the contact image from the sensor readings.
+"""
+
+
 def encloses(triangle, point):
     """
     Check if a point lays within a 2D triangle
@@ -111,6 +116,8 @@ def get_pressure(triangles, uv, x_rc, sensor_readings):
 
 
 def show_image(image, uv=None, triangles=None):
+    # Clear the plot
+    plt.clf()
 
     plt.imshow(image, cmap='plasma')
 
@@ -140,6 +147,9 @@ def show_image(image, uv=None, triangles=None):
         # scatter plot of vertices
         plt.scatter(uv[:, 0], uv[:, 1], s=2, color='black', alpha=alpha)
 
+    # do not show axis
+    plt.axis('off')
+
     plt.show()
 
 
@@ -161,7 +171,7 @@ def form_contact_image(sensor_positions_2D, sensor_readings, resolution):
     # Perform a 3D Delaunay triangulation on the sensor positions
     triangles = Delaunay(uv).simplices
 
-    plot_mesh_2D(uv, triangles)
+    # plot_mesh_2D(uv, triangles)
 
     # Create a grid for the image
     x_min, y_min = min(uv[:, 0]), min(uv[:, 1])
@@ -169,7 +179,7 @@ def form_contact_image(sensor_positions_2D, sensor_readings, resolution):
 
     resolution_x = int((x_max - x_min) * resolution)
     resolution_y = int((y_max - y_min) * resolution)
-    print("image dimensions: ", resolution_x, "x", resolution_y, "pixels")
+    # print("image dimensions: ", resolution_x, "x", resolution_y, "pixels")
 
     # Create a meshgrid for the image
     X = np.linspace(start=x_min, stop=x_max, num=resolution_x)
@@ -188,7 +198,7 @@ def form_contact_image(sensor_positions_2D, sensor_readings, resolution):
             image[r, c] = get_pixel_color(sensor_readings, p_rc)
 
     # Map the grid onto the image
-    show_image(image, uv, triangles)
+    # show_image(image)
 
     return image
 

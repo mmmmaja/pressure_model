@@ -5,39 +5,21 @@ from fenics import FENICS
 from relaxation_script import StressRelaxation
 
 """
-Pressure: 
-Pressure is the force applied perpendicular to the surface of an object 
-per unit area over which that force is distributed. 
-Pressure is simply force distributed over an area. 
-
-The pressure is the force divided by the surface area of the shape where it contacts the mesh.
-
-It's typically measured in Pascals (Pa), w
-here 1 Pa equals a force of 1 Newton per square meter.
-"""
-
-"""
-This script contains the classes that represent the forces acting on the mesh.
-there are different types of forces that can be applied to the mesh.
-
-The force (force strength) is specified in the GUI class.
-Not sure if this  is the right way to do it tho...
 
 The ForceHandler class is a parent class for all the forces.
 
-    The VolumeForce class is a force that is applied to the whole mesh.
+    The VolumePressure class is a force that is applied to the whole mesh.
     
-    The StimuliForce class is a force that is applied with a stimulus.
+    The StimuliPressure class is a force that is applied with a stimulus.
     (Force is dependant on the stimulus shape and position)
-    
-    The CellSpecificForce is a force that is applied to a specific cell in the mesh.
-    (Force is specified in the GUI class)
-    
-    MeshIntersectionForce is the same as CellSpecificForce but we need to map the cell_id to the mesh first
 """
 
 
 class PressureHandler:
+
+    def __init__(self):
+        # Parent class for all the forces
+        pass
 
     @abstractmethod
     def get_pressure(self, vertex_coordinates: np.ndarray) -> float:
@@ -108,57 +90,6 @@ class StimuliPressure(PressureHandler):
         return pressure
 
 
-class MeshIntersectionPressure(PressureHandler):
-
-    def __init__(self, cell_id, picker, pressure_strength):
-        """
-        Force that is applied to a specific cell in the mesh
-        :param cell_id: ID of the cell in the mesh that was picked
-        :param picker: vtkCellPicker object that was used to pick the cell
-        :param pressure_strength: float value representing the strength of the pressure applied
-        """
-        super().__init__()
-        self.cell_id = cell_id
-        self.picker = picker
-        self.pressure_strength = pressure_strength
-
-        self.affected_points = self.get_affected_points()
-
-    def get_affected_points(self):
-
-        # It will return the ids of the 8 points that make up the hexahedron
-        cell_points_ids = self.picker.GetActor().GetMapper().GetInput().GetCell(self.cell_id).GetPointIds()
-
-        # The points list will contain the coordinates of the points that belong to the cell
-        points = []
-        for i in range(cell_points_ids.GetNumberOfIds()):
-            point_id = cell_points_ids.GetId(i)
-            # Map the point id to the coordinates of the mesh cells
-            points.append(self.picker.GetActor().GetMapper().GetInput().GetPoint(point_id))
-
-        # Remove the bottom layer of points (Points with z coordinate == 0)
-        points = [point for point in points if point[2] != 0]
-        return points
-
-    def get_pressure(self, vertex_coordinates: np.ndarray) -> float:
-        if is_inside(vertex_coordinates, self.affected_points):
-            return self.pressure_strength
-        return 0.0
-
-
-class CellSpecificPressure(PressureHandler):
-
-    def __init__(self, affected_points, pressure_strength):
-        super().__init__()
-        self.affected_points = affected_points
-        self.pressure_strength = pressure_strength
-
-    def get_pressure(self, vertex_coordinates: np.ndarray) -> float:
-        if is_inside(vertex_coordinates, self.affected_points):
-            return self.pressure_strength
-        return 0.0
-
-
 """
 Handle applying the pressure to the mesh
 """
@@ -180,13 +111,6 @@ def apply_stimuli_pressure(gui, stimuli, picker, cell_id, relaxation=True):
         force_handler = StimuliPressure(stimuli, gui.PRESSURE)
         # Apply the pressure to the mesh, start the FENICS computation
         apply_pressure(gui, force_handler, relaxation)
-
-
-def apply_cell_specific_pressure(gui, cell, relaxation=True):
-    if not cell:
-        return
-    force_handler = CellSpecificPressure(cell.points, gui.PRESSURE)
-    apply_pressure(gui, force_handler, relaxation)
 
 
 def apply_pressure(gui, force_handler, relaxation):

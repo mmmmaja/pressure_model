@@ -3,7 +3,6 @@ import pyvistaqt as pvqt  # For updating plots real time
 from PyQt5.QtWidgets import QAction  # For the custom button
 from recording_manager import Recording
 
-
 """
 Script that handles the GUI of the application
 Pyvistaqt plotting is used
@@ -13,21 +12,25 @@ Pyvistaqt plotting is used
 class GUI:
 
     def __init__(self, mesh_boost, mesh_material, stimuli, sensors):
+        """
+        Class responsible for handling the GUI of the application
 
-        # Mesh object that has all the information about the mesh
+        :param mesh_boost: Mesh object that has all the information about the mesh
+        :param mesh_material: Rank material for rendering the mesh
+        :param stimuli: Stimuli object just for reference for the user
+        :param sensors: List of sensors that record stress and strain
+        """
+
         self.mesh_boost = mesh_boost
-        # Rank material for rendering the mesh
         self.mesh_material = mesh_material
-        # Stimuli object just for reference for the user
         self.stimuli = stimuli
-        # List of sensors that record pressure
         self.sensors = sensors
 
-        # Define the sensor output type
+        # Define the default output type of the sensors
         self.sensor_output_type = 'stress'
 
-        # Define the pressure
-        self.PRESSURE = 0.001
+        # Define the intial pressure
+        self.PRESSURE = 0.01
         # Change in the pressure when on the event
         self.pressure_dt = 0.01
 
@@ -127,7 +130,6 @@ class GUI:
         )
 
     def draw_sensors(self):
-        return
         # Draw the sensor points in the plotter
         self.sensor_actor = self.plotter.add_mesh(
             self.sensors.visualization,

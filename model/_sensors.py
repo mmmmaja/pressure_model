@@ -7,10 +7,7 @@ import sys
 """
 This file contains the classes for the sensor arrays. 
 We can create different sensor configurations for the mesh.
-The sensors are used to measure the pressure at a certain point in the mesh.
-"""
 
-"""
 Types of sensor outputs:
     - Stress
     - Strain

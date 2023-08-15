@@ -139,9 +139,9 @@ def projection_onto_grid_positions(sensor_positions):
     # SCALING
     # Compute the scale factors
     scale_x = (np.max(grid_positions[:, 0]) - np.min(grid_positions[:, 0])) / (
-                np.max(sensor_positions_flattened[:, 0]) - np.min(sensor_positions_flattened[:, 0]))
+            np.max(sensor_positions_flattened[:, 0]) - np.min(sensor_positions_flattened[:, 0]))
     scale_y = (np.max(grid_positions[:, 1]) - np.min(grid_positions[:, 1])) / (
-                np.max(sensor_positions_flattened[:, 1]) - np.min(sensor_positions_flattened[:, 1]))
+            np.max(sensor_positions_flattened[:, 1]) - np.min(sensor_positions_flattened[:, 1]))
 
     # Scale the grid
     sensor_positions_flattened[:, 0] = sensor_positions_flattened[:, 0] * scale_x

@@ -1,13 +1,14 @@
 import pyvista
-import vtk
-
 from fenics import SfepyMesh
 from abc import abstractmethod
 import numpy as np
 import meshio
 import pyvista as pv
-
 from mesh_helper import *
+
+"""
+This module contains the MeshBoost class that is used to create and manipulate meshes.
+"""
 
 
 def convert_to_vtk(path):
@@ -125,7 +126,6 @@ class MeshBoost:
 
 
 class GridMesh(MeshBoost):
-
     # Thickness of the mesh
     THICKNESS = 2.73
 
@@ -190,7 +190,7 @@ class GridMesh(MeshBoost):
                     c_top, d_top = (i + 1) * self.width + j + 1 + k * n, (i + 1) * self.width + j + k * n
                     cells.append([
                         a_top, b_top, c_top, d_top,
-                        a_top + n, b_top + n,  c_top + n, d_top + n
+                        a_top + n, b_top + n, c_top + n, d_top + n
                     ])
 
         # Create a top region (Where the displacements happen)
@@ -206,7 +206,6 @@ class GridMesh(MeshBoost):
 
 
 class ArmMesh(MeshBoost):
-
     # Thickness of the mesh
     # Make sure that thickness is not too big ( otherwise the mesh will crash :( )
     THICKNESS = 1.2

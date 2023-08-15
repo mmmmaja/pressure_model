@@ -10,16 +10,14 @@ from sfepy.solvers.nls import Newton
 
 
 """
-Good resource for FEM:  
-https://quantpaleo.earth.indiana.edu/Lectures/Finite%20Element%20Analysis.pdf
-https://www.simscale.com/blog/stress-and-strain/
-
 In this file the solver for the Sfepy library is defined.
+It handles the physics behind the action of the pressure on the mesh.
 """
 
 
 def create_force_function(force_handler):
     """
+    In this method the force function is created based on the stimulus.
     :param force_handler: a ForceHandler object that specifies a force at each point of the mesh
     :return: force function to create the material with the force term
     """
@@ -81,6 +79,12 @@ def get_solver(iterative=True):
 class FENICS:
 
     def __init__(self, fenics_mesh, rank_material, sensors):
+        """
+        Main class for the FEM solver
+        :param fenics_mesh: The mesh of the model in the Sfepy format
+        :param rank_material: The material of the model
+        :param sensors: The sensors of the model
+        """
 
         # Object with all the mesh properties for the FEM solver
         self.fenics_mesh = fenics_mesh
@@ -106,8 +110,8 @@ class FENICS:
         :return: displacement u of the mesh for each vertex in x, y, z direction
         """
 
-        field = self.fenics_mesh.field
         DOMAIN = self.fenics_mesh.DOMAIN
+        field = self.fenics_mesh.field
         omega = self.fenics_mesh.omega
 
         # Create an Integral over the domain
@@ -151,7 +155,7 @@ class FENICS:
 
         # 7) Solve the problem
         variables = PROBLEM.solve(
-            post_process_hook_final=self.calculate_stress
+            post_process_hook_final=self.post_processing
         )
 
         dim = 3
@@ -164,10 +168,12 @@ class FENICS:
         print('maximum displacement y:', np.abs(u[:, 1]).max())
         print('maximum displacement z:', np.abs(u[:, 2]).max())
 
+        # Return the resulting displacement of the mesh
         return u
 
     def get_force_term(self, force_handler, v):
         """
+        Creates the force term for the equation based on the stimuli acting on the mesh
         :param force_handler: a ForceHandler object that specifies a force at each point of the mesh
         :param v: The test variable
         :return: The force term associated with the given regions of the mesh
@@ -187,10 +193,10 @@ class FENICS:
         )
         return force_term
 
-    def calculate_stress(self, pb, state):
+    def post_processing(self, pb, state):
         """
         The sensors measure internal forces, so the internal forces are derived from the displacements.
-        Stresses are calculated as post-processing quantities once a converged solution is obtained.
+        Stresses and Strains are calculated as post-processing quantities once a converged solution is obtained.
 
         :param pb: The Problem instance which was solved.
         :param state: The state variable (displacement) obtained by solving the problem
@@ -222,7 +228,7 @@ class FENICS:
         σ_xz = σ_zx
         σ_yz = σ_zy
         
-        I am just interested in diagonal elements of the stress tensor, which are the normal stresses.
+        We are simply interested in diagonal elements of the stress tensor, which are the normal stresses.
         """
         # Calculate the stress tensor and flatten it
         stress_tensor_np = np.squeeze(np.array(stress.data))
@@ -240,7 +246,7 @@ This class is used to create a mesh from a vtk file and to create the sfepy inst
 
 def transform_mesh(vtk_mesh):
     """
-    This is the stupid way to create a mesh from a vtk file but there is no other way to do it.
+    Create a mesh from a vtk file
     (Sfepy mesh cannot be updated once it is created)
 
     :param vtk_mesh: The vtk mesh instance
@@ -256,6 +262,10 @@ def transform_mesh(vtk_mesh):
 class SfepyMesh:
 
     def __init__(self, mesh_boost):
+        """
+        Create the sfepy mesh from the vtk mesh
+        :param mesh_boost: The vtk mesh instance
+        """
 
         # Create the mesh from the vtk instance of the mesh
         self.fenics_mesh = transform_mesh(mesh_boost.current_vtk)
@@ -286,6 +296,7 @@ class SfepyMesh:
         except RuntimeError:
             # Mesh is not valid
             return False
+
         return True
 
     def validate(self, threshold=0.00135):
@@ -322,10 +333,8 @@ class SfepyMesh:
 
         # Check if the mesh is inverted
         if min_det < threshold:
-            print('INVALID MESH', min_det)
             return False
         else:
-            print('valid mesh', min_det)
             return True
 
     def get_neighbouring_cells(self, vertex_id):

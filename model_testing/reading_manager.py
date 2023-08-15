@@ -3,7 +3,6 @@ from matplotlib import pyplot as plt
 import matplotlib.colors as colors
 from scipy.interpolate import griddata
 from model_testing.lukas_handler import read_lukas_recording
-from model_testing.model_validation import TimeSeriesAnalysis
 from model_testing.pressure_image import form_contact_image
 from model_testing.surface_flattening import orthographic_projection
 from surface_flattening import *
@@ -11,21 +10,21 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.ticker as ticker
 
+"""
+In this file I read specified recordings and investigate its data and properties
+"""
+
 
 def read_csv(path):
     """
     Read the data from the csv file and save it to the class variables
+    (It reads data from a format defined within this simulator model)
     :param path: path to the csv file with sensor recordings
     :return: sensor_positions, sensor_readings lists
     """
     index = 0
     sensor_positions, sensor_readings, time = [], [], []
     with open(path, 'r', newline='') as file:
-
-        # Number of columns in the file
-        num_columns = len(file.readline().split(','))
-        # Number of rows in the file
-        num_rows = len(file.readlines())
 
         # Go back to the beginning of the file
         file.seek(0)
@@ -49,7 +48,7 @@ def read_csv(path):
                 str_row = row.split(',')
 
                 # Read time in seconds
-                time.append(float(str_row[-1]))
+                time.append(float(str_row[-1]) / 1000)
 
                 # Read sensor readings
                 for reading in str_row[:-1]:
@@ -57,7 +56,7 @@ def read_csv(path):
                     float_row = reading.split(' ')
                     # Convert to numpy array
                     sensor_readings_frame.append(
-                       [float(x) for x in float_row]
+                        [float(x) for x in float_row]
                     )
                 # Add the sensor readings to the list from all the frames
                 sensor_readings.append(sensor_readings_frame)
@@ -163,8 +162,8 @@ class ReadingManager:
 
     def create_image(self, resolution=3, frame_index=None):
         if frame_index is None:
-            frame_index = len(self.sensor_reading) // 2 + 2
-        form_contact_image(self.sensor_positions_mapping, self.sensor_reading[frame_index], resolution)
+            frame_index = self.get_descriptive_frame()
+        return form_contact_image(self.sensor_positions_mapping, self.sensor_reading[frame_index], resolution)
 
     def identify_faulty_sensors(self, threshold_std=1e-5, threshold_mean_factor=5):
 
@@ -189,8 +188,13 @@ class ReadingManager:
             if std < threshold_std and abs(mean - overall_mean) > threshold_mean_factor * overall_std:
                 # Change the output of the sensor at each time step to the overall mean
                 self.sensor_reading[:, i] = overall_mean
-                print(f"Sensor {i}, mean: {mean}, std: {std}")
-                print(f"Sensor {i} is faulty and has been replaced with the overall mean")
+                # print(f"Sensor {i}, mean: {mean}, std: {std}")
+                # print(f"Sensor {i} is faulty and has been replaced with the overall mean")
+            elif abs(mean - overall_mean) > threshold_mean_factor * overall_std * 10:
+                # Change the output of the sensor at each time step to the overall mean
+                self.sensor_reading[:, i] = overall_mean
+                # print(f"Sensor {i}, mean: {mean}, std: {std}")
+                # print(f"Sensor {i} is faulty and has been replaced with the overall mean")
 
     def get_descriptive_frame(self):
         # Find a frame with the highest output in sensor readings
@@ -216,10 +220,7 @@ class ReadingManager:
         print(f"Min pressure: {min_pressure}")
         print(f"Max pressure: {max_pressure}")
 
-    def plot_time_series(self, title=None, y_label='Sensor output'):
-        sns.set_style('darkgrid')
-        sns.set(rc={'figure.figsize': (10, 6)})
-
+    def get_dataframe(self):
         # Create a dataframe with the sensor readings
         sensor_reading_df = pd.DataFrame()
         sensor_reading_df['Time'] = self.time
@@ -237,6 +238,14 @@ class ReadingManager:
 
         # Add the column for standard deviation of the sensor readings for the frame
         sensor_reading_df['Std'] = np.std(self.sensor_reading, axis=1)
+        return sensor_reading_df
+
+    def plot_time_series(self, title=None, y_label='Sensor output'):
+        sns.set_style('darkgrid')
+        sns.set(rc={'figure.figsize': (8, 6)})
+
+        # Create a dataframe with the sensor readings
+        sensor_reading_df = self.get_dataframe()
 
         palette = sns.color_palette("mako_r", 3)
 
@@ -269,19 +278,6 @@ class ReadingManager:
         plt.legend()
         plt.show()
 
-
-def distribution_analysis(sensor_readings):
-
-    # Get the sensor with maximum output
-    max_sensor = np.argmax(np.max(sensor_readings, axis=0))
-    print(f"Sensor with maximum output: {max_sensor}")
-
-    # Plot the histogram of this sensor
-    plt.hist(sensor_readings[:, max_sensor])
-    plt.title(f"Histogram of sensor {max_sensor}")
-    plt.show()
-
-
 def get_chosen_time_frames(sensor_readings, readings_time_frame, desired_time_frames):
     """
     Get the sensor readings for the desired time frames
@@ -305,46 +301,3 @@ def get_chosen_time_frames(sensor_readings, readings_time_frame, desired_time_fr
     cropped_recording = np.array(chosen_time_frames)
     return cropped_recording
 
-
-if __name__ == '__main__':
-
-    pos_m, rec_m, time_m = read_csv('../recordings/2023-07-21_16-18-16_strain.csv')
-    rec_m = z_sensor_readings(rec_m)
-
-    pos_l, rec_l, time_l = read_lukas_recording(
-        "C:/Users/majag/Desktop/arm_data/short/sphere_sensor_press_2_LIN.xlsx"
-    )
-    # cropped_rec_m = get_chosen_time_frames(rec_m, time_m, time_l)
-    #
-    # analysis = TimeSeriesAnalysis(rec_l, cropped_rec_m)
-    # analysis.multivariate_distance_metrics()
-    # # analysis.plot_3D_data(pos_l, pos_m)
-    # analysis.correlation_matrices()
-
-
-    reader_maja = ReadingManager(pos_m, rec_m, time_m)
-    frame_index_m = reader_maja.get_descriptive_frame()
-    reader_maja.plot_time_series(title="Model recording")
-    reader_maja.visualize()
-    reader_maja.create_image(resolution=2, frame_index=frame_index_m)
-
-
-    reader_lukas = ReadingManager(pos_l, rec_l, time_l)
-    reader_lukas.identify_faulty_sensors()
-    # frame_index_l = reader_lukas.get_descriptive_frame()
-    reader_lukas.plot_time_series(title="Robotic arm device recording")
-    # print(frame_index_l)
-    # reader_lukas.create_image(resolution=2, frame_index=reader_lukas.get_descriptive_frame())
-    # reader_lukas.visualize(index=frame_index_l)
-
-
-    # distribution_analysis(reader_maja.sensor_reading)
-    # distribution_analysis(reader_lukas.sensor_reading)
-
-
-"""
-https://www.researchgate.net/publication/224230704_Tactile-Object_Recognition_From_Appearance_Information
-
-Characterization and simulation of tactile sensors
-https://pure.johnshopkins.edu/en/publications/characterization-and-simulation-of-tactile-sensors-4
-"""

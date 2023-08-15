@@ -1,9 +1,10 @@
 import csv
-import random
 from datetime import datetime
 from PyQt5.QtCore import QTimer
-from fenics import FENICS
-from pressure_script import StimuliPressure
+
+"""
+This script contains the Recording class, which is used to record the data from the sensors.
+"""
 
 
 class Recording:

@@ -1,6 +1,11 @@
 import random
 from sfepy.mechanics.matcoefs import stiffness_from_youngpoisson, lame_from_youngpoisson
 
+"""
+This file contains the material properties of the different materials used in the model.
+The material properties are defined in the Rank_Material class
+"""
+
 _colors = [
     '#e2a4ff',
     '#39ddff',
@@ -25,7 +30,7 @@ def get_lighter_color(surface_color):
     return surface_color
 
 
-class Rank_Material:
+class RankMaterial:
 
     def __init__(self, name, young_modulus, poisson_ratio, time_constant, visual_properties=None):
         """
@@ -94,7 +99,7 @@ class Rank_Material:
 
 # Create a database of materials
 
-silicon = Rank_Material(
+silicon = RankMaterial(
     name='Silicon',
     young_modulus=150.0, poisson_ratio=0.29,
     time_constant=1.0,
@@ -107,7 +112,7 @@ silicon = Rank_Material(
     }
 )
 
-rubber = Rank_Material(
+rubber = RankMaterial(
     name='Rubber',
     young_modulus=0.05, poisson_ratio=0.499,
     time_constant=100,
@@ -120,7 +125,7 @@ rubber = Rank_Material(
     }
 )
 
-steel = Rank_Material(
+steel = RankMaterial(
     name='Steel',
     young_modulus=190.0, poisson_ratio=0.29,
     time_constant=1.0,
@@ -133,7 +138,7 @@ steel = Rank_Material(
     }
 )
 
-polyurethane_foam = Rank_Material(
+polyurethane_foam = RankMaterial(
     name='Polyurethane foam',
     young_modulus=0.1, poisson_ratio=0.25,
     time_constant=1000.0,

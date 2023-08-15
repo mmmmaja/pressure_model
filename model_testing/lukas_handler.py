@@ -5,6 +5,11 @@ import numpy as np
 import openpyxl
 from matplotlib import pyplot as plt
 
+"""
+In this file I am reading the data from robotic arm recordings. The data is stored in .csv files.
+"""
+
+
 nds_frontX = [0.000, 25.981, 51.962, 77.943, 12.990, 38.971, 64.952, 90.933, 0.000, 25.981, 51.962, 77.943, 12.990,
               38.971, 64.952, 90.933, 0.000, 25.981, 51.962, 77.943, 12.990, 38.971, 64.952, 90.933, 0.000, 25.981,
               51.962, 77.943, 12.990, 38.971, 64.952, 90.933, 0.000, 25.981, 51.962, 77.943, 12.990, 38.971, 64.952,
@@ -67,6 +72,7 @@ def read_lukas_recording(path):
     sensor_reading = read_sensor_data(sheet, path)
 
     return sensor_positions, sensor_reading, time
+
 
 def read_time(sheet):
     """
