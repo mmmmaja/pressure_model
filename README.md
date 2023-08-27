@@ -28,6 +28,15 @@ pip install PyQt5 pyvistaqt pyvista sfepy numpy pandas matplotlib scipy vtk
 
 ## How to use
 
+### Code Structure
+
+This project consists of two main folders. The **model** folder contains the main model and the GUI. 
+All the following guidelines are for this folder.
+
+The **model_testing** folder contains the files used for testing and validating the model.
+It is not necessary for the model to run, but I kept it to investigate model's strengths and weaknesses.
+
+
 ### Simulation Setup
     
 You can choose the objects that will be used in the simulation by modifying the **setup.py** file in the model folder.
